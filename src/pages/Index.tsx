@@ -48,7 +48,7 @@ const Index = () => {
             </TabsTrigger>
             <TabsTrigger value="reports" className="flex items-center gap-2 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700">
               <BarChart3 className="w-4 h-4" />
-              Relatórios
+              Relatório Diário
             </TabsTrigger>
             <TabsTrigger value="visual-reports" className="flex items-center gap-2 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700">
               <FileImage className="w-4 h-4" />
