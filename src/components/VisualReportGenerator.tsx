@@ -1,5 +1,4 @@
-
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -7,17 +6,18 @@ import { Badge } from '@/components/ui/badge';
 import { Student, Subject, Absence } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { FileImage, Download, Calendar, TrendingDown, Users, BookOpen } from 'lucide-react';
+import { FileImage, Download, Calendar, TrendingDown, Users, BookOpen, Upload, X } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import html2canvas from 'html2canvas';
-import { useState } from 'react';
 
 const VisualReportGenerator = () => {
   const [reportType, setReportType] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [logoUrl, setLogoUrl] = useState<string>('');
   const reportRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const { data: students = [] } = useQuery({
     queryKey: ['students'],
@@ -73,6 +73,24 @@ const VisualReportGenerator = () => {
       return data;
     }
   });
+
+  const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setLogoUrl(e.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const removeLogo = () => {
+    setLogoUrl('');
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
 
   const getFilteredData = () => {
     const selectedDateObj = new Date(selectedDate);
@@ -201,6 +219,42 @@ const VisualReportGenerator = () => {
             </div>
           </div>
 
+          <div>
+            <label className="text-sm font-medium text-card-foreground mb-2 block">Logo da Instituição</label>
+            <div className="flex items-center gap-4">
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleLogoUpload}
+                className="hidden"
+              />
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex items-center gap-2"
+              >
+                <Upload className="w-4 h-4" />
+                Escolher Logo
+              </Button>
+              {logoUrl && (
+                <div className="flex items-center gap-2">
+                  <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain border rounded" />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={removeLogo}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+
           <Button onClick={generateReport} className="w-full">
             <Download className="w-4 h-4 mr-2" />
             Gerar e Baixar Relatório Visual
@@ -211,9 +265,15 @@ const VisualReportGenerator = () => {
       {/* Preview do Relatório */}
       <div ref={reportRef} className="bg-white p-8 rounded-lg shadow-lg" style={{ fontFamily: 'Arial, sans-serif' }}>
         <div className="text-center mb-8 border-b border-gray-200 pb-6">
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            Sistema de Controle de Presença Escolar
-          </h1>
+          {logoUrl ? (
+            <div className="flex justify-center mb-4">
+              <img src={logoUrl} alt="Logo da Instituição" className="max-w-48 max-h-24 object-contain" />
+            </div>
+          ) : (
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">
+              Desenvolvimento de Sistemas
+            </h1>
+          )}
           <h2 className="text-xl text-blue-600 font-semibold">
             {getReportTitle()}
           </h2>
@@ -363,7 +423,7 @@ const VisualReportGenerator = () => {
         {/* Rodapé */}
         <div className="mt-8 pt-6 border-t border-gray-300 text-center">
           <p className="text-xs text-gray-500">
-            Sistema de Controle de Presença Escolar - Relatório gerado automaticamente
+            Desenvolvimento de Sistemas - Relatório gerado automaticamente
           </p>
           <p className="text-xs text-gray-400 mt-1">
             Este documento contém informações confidenciais da instituição de ensino
