@@ -9,7 +9,131 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      attendance_records: {
+        Row: {
+          class_session_id: string | null
+          created_at: string | null
+          id: string
+          notes: string | null
+          present: boolean | null
+          student_id: string | null
+        }
+        Insert: {
+          class_session_id?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          present?: boolean | null
+          student_id?: string | null
+        }
+        Update: {
+          class_session_id?: string | null
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          present?: boolean | null
+          student_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attendance_records_class_session_id_fkey"
+            columns: ["class_session_id"]
+            isOneToOne: false
+            referencedRelation: "class_sessions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attendance_records_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      class_sessions: {
+        Row: {
+          created_at: string | null
+          date: string
+          id: string
+          notes: string | null
+          subject_id: string | null
+          topic: string
+        }
+        Insert: {
+          created_at?: string | null
+          date: string
+          id?: string
+          notes?: string | null
+          subject_id?: string | null
+          topic: string
+        }
+        Update: {
+          created_at?: string | null
+          date?: string
+          id?: string
+          notes?: string | null
+          subject_id?: string | null
+          topic?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "class_sessions_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      students: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+        }
+        Relationships: []
+      }
+      subjects: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          teacher: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          teacher: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          teacher?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

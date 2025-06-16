@@ -2,33 +2,33 @@
 export interface Student {
   id: string;
   name: string;
-  email: string;
-  phone: string;
-  createdAt: Date;
+  email?: string;
+  phone?: string;
+  created_at: string;
 }
 
 export interface Subject {
   id: string;
   name: string;
-  description: string;
+  description?: string;
   teacher: string;
-  createdAt: Date;
-}
-
-export interface AttendanceRecord {
-  id: string;
-  studentId: string;
-  subjectId: string;
-  date: Date;
-  present: boolean;
-  notes?: string;
+  created_at: string;
 }
 
 export interface ClassSession {
   id: string;
-  subjectId: string;
-  date: Date;
+  subject_id: string;
+  date: string;
   topic: string;
-  attendanceRecords: AttendanceRecord[];
-  createdAt: Date;
+  notes?: string;
+  created_at: string;
+}
+
+export interface AttendanceRecord {
+  id: string;
+  class_session_id: string;
+  student_id: string;
+  present: boolean;
+  notes?: string;
+  created_at: string;
 }

@@ -1,46 +1,80 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Student, Subject, ClassSession } from '@/types';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { Student, Subject, ClassSession, AttendanceRecord } from '@/types';
+import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+interface ClassSessionWithRecords extends ClassSession {
+  attendance_records: AttendanceRecord[];
+  subjects: Subject;
+}
+
 const AttendanceHistory = () => {
-  const [students] = useLocalStorage<Student[]>('students', []);
-  const [subjects] = useLocalStorage<Subject[]>('subjects', []);
-  const [classSessions] = useLocalStorage<ClassSession[]>('classSessions', []);
-  
+  const [students, setStudents] = useState<Student[]>([]);
+  const [subjects, setSubjects] = useState<Subject[]>([]);
+  const [classSessions, setClassSessions] = useState<ClassSessionWithRecords[]>([]);
   const [selectedSubject, setSelectedSubject] = useState<string>('all');
   const [selectedStudent, setSelectedStudent] = useState<string>('all');
 
-  const filteredSessions = useMemo(() => {
-    return classSessions.filter(session => {
-      if (selectedSubject !== 'all' && session.subjectId !== selectedSubject) {
-        return false;
-      }
-      
-      if (selectedStudent !== 'all') {
-        return session.attendanceRecords.some(record => record.studentId === selectedStudent);
-      }
-      
-      return true;
-    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  }, [classSessions, selectedSubject, selectedStudent]);
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      // Buscar alunos
+      const { data: studentsData } = await supabase
+        .from('students')
+        .select('*')
+        .order('name');
+
+      // Buscar matérias
+      const { data: subjectsData } = await supabase
+        .from('subjects')
+        .select('*')
+        .order('name');
+
+      // Buscar sessões de aula com registros de presença
+      const { data: sessionsData } = await supabase
+        .from('class_sessions')
+        .select(`
+          *,
+          subjects (*),
+          attendance_records (*)
+        `)
+        .order('date', { ascending: false });
+
+      setStudents(studentsData || []);
+      setSubjects(subjectsData || []);
+      setClassSessions(sessionsData || []);
+    } catch (error) {
+      console.error('Erro ao buscar dados:', error);
+    }
+  };
+
+  const filteredSessions = classSessions.filter(session => {
+    if (selectedSubject !== 'all' && session.subject_id !== selectedSubject) {
+      return false;
+    }
+    
+    if (selectedStudent !== 'all') {
+      return session.attendance_records.some(record => record.student_id === selectedStudent);
+    }
+    
+    return true;
+  });
 
   const getStudentName = (studentId: string) => {
     return students.find(s => s.id === studentId)?.name || 'Aluno não encontrado';
   };
 
-  const getSubjectName = (subjectId: string) => {
-    return subjects.find(s => s.id === subjectId)?.name || 'Matéria não encontrada';
-  };
-
-  const getAttendanceStats = (session: ClassSession) => {
-    const total = session.attendanceRecords.length;
-    const present = session.attendanceRecords.filter(r => r.present).length;
+  const getAttendanceStats = (session: ClassSessionWithRecords) => {
+    const total = session.attendance_records.length;
+    const present = session.attendance_records.filter(r => r.present).length;
     const absent = total - present;
     return { total, present, absent };
   };
@@ -48,8 +82,8 @@ const AttendanceHistory = () => {
   if (classSessions.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500 text-lg">Nenhum registro de aula encontrado.</p>
-        <p className="text-gray-400">Registre aulas primeiro na aba "Registro de Aulas".</p>
+        <p className="text-muted-foreground text-lg">Nenhum registro de aula encontrado.</p>
+        <p className="text-muted-foreground">Registre aulas primeiro na aba "Registro de Aulas".</p>
       </div>
     );
   }
@@ -57,19 +91,19 @@ const AttendanceHistory = () => {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-slate-800">Histórico de Presenças</h2>
+        <h2 className="text-2xl font-bold text-foreground">Histórico de Presenças</h2>
       </div>
 
       <div className="flex gap-4 flex-wrap">
         <div>
           <Select value={selectedSubject} onValueChange={setSelectedSubject}>
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-48 bg-background border-border text-foreground">
               <SelectValue placeholder="Filtrar por matéria" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todas as matérias</SelectItem>
+            <SelectContent className="bg-popover border-border">
+              <SelectItem value="all" className="text-popover-foreground">Todas as matérias</SelectItem>
               {subjects.map((subject) => (
-                <SelectItem key={subject.id} value={subject.id}>
+                <SelectItem key={subject.id} value={subject.id} className="text-popover-foreground">
                   {subject.name}
                 </SelectItem>
               ))}
@@ -79,13 +113,13 @@ const AttendanceHistory = () => {
 
         <div>
           <Select value={selectedStudent} onValueChange={setSelectedStudent}>
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-48 bg-background border-border text-foreground">
               <SelectValue placeholder="Filtrar por aluno" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Todos os alunos</SelectItem>
+            <SelectContent className="bg-popover border-border">
+              <SelectItem value="all" className="text-popover-foreground">Todos os alunos</SelectItem>
               {students.map((student) => (
-                <SelectItem key={student.id} value={student.id}>
+                <SelectItem key={student.id} value={student.id} className="text-popover-foreground">
                   {student.name}
                 </SelectItem>
               ))}
@@ -100,25 +134,30 @@ const AttendanceHistory = () => {
           const sessionDate = new Date(session.date);
           
           return (
-            <Card key={session.id} className="hover:shadow-lg transition-shadow">
+            <Card key={session.id} className="hover:shadow-lg transition-shadow bg-card border-border">
               <CardHeader>
                 <div className="flex justify-between items-start">
                   <div>
-                    <CardTitle className="text-lg">
-                      {getSubjectName(session.subjectId)}
+                    <CardTitle className="text-lg text-card-foreground">
+                      {session.subjects.name}
                     </CardTitle>
-                    <p className="text-sm text-gray-600 mt-1">
+                    <p className="text-sm text-muted-foreground mt-1">
                       {format(sessionDate, "dd 'de' MMMM 'de' yyyy", { locale: ptBR })}
                     </p>
-                    <p className="text-sm font-medium text-slate-700 mt-1">
+                    <p className="text-sm font-medium text-card-foreground mt-1">
                       Tópico: {session.topic}
                     </p>
+                    {session.notes && (
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Observações: {session.notes}
+                      </p>
+                    )}
                   </div>
                   <div className="flex gap-2">
-                    <Badge variant="outline" className="bg-green-50 text-green-700">
+                    <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">
                       {stats.present} Presentes
                     </Badge>
-                    <Badge variant="outline" className="bg-red-50 text-red-700">
+                    <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">
                       {stats.absent} Faltas
                     </Badge>
                   </div>
@@ -126,19 +165,19 @@ const AttendanceHistory = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {session.attendanceRecords
-                    .filter(record => selectedStudent === 'all' || record.studentId === selectedStudent)
+                  {session.attendance_records
+                    .filter(record => selectedStudent === 'all' || record.student_id === selectedStudent)
                     .map((record) => (
                     <div 
                       key={record.id} 
-                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                      className="flex items-center justify-between p-3 bg-muted rounded-lg"
                     >
                       <div className="flex items-center gap-3">
                         <div className={`w-3 h-3 rounded-full ${
                           record.present ? 'bg-green-500' : 'bg-red-500'
                         }`} />
-                        <span className="font-medium">
-                          {getStudentName(record.studentId)}
+                        <span className="font-medium text-foreground">
+                          {getStudentName(record.student_id)}
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
@@ -149,7 +188,7 @@ const AttendanceHistory = () => {
                           {record.present ? 'Presente' : 'Falta'}
                         </Badge>
                         {record.notes && (
-                          <span className="text-sm text-gray-600 italic">
+                          <span className="text-sm text-muted-foreground italic">
                             "{record.notes}"
                           </span>
                         )}
