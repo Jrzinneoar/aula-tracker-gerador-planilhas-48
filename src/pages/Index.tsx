@@ -6,8 +6,9 @@ import StudentManager from '@/components/StudentManager';
 import SubjectManager from '@/components/SubjectManager';
 import ClassRegistry from '@/components/ClassRegistry';
 import AttendanceHistory from '@/components/AttendanceHistory';
-import ReportGenerator from '@/components/ReportGenerator';
-import { Users, BookOpen, Calendar, FileText, BarChart3 } from 'lucide-react';
+import AbsenceManager from '@/components/AbsenceManager';
+import VisualReportGenerator from '@/components/VisualReportGenerator';
+import { Users, BookOpen, Calendar, FileText, UserX, BarChart3 } from 'lucide-react';
 
 const Index = () => {
   return (
@@ -18,12 +19,12 @@ const Index = () => {
             Sistema de Controle de Presença Escolar
           </h1>
           <p className="text-muted-foreground text-lg">
-            Gerencie alunos, matérias e registre presenças de forma simples e eficiente
+            Gerencie alunos, matérias, registre aulas e controle faltas de forma simples e eficiente
           </p>
         </div>
 
         <Tabs defaultValue="students" className="w-full">
-          <TabsList className="grid w-full grid-cols-5 mb-8 bg-muted">
+          <TabsList className="grid w-full grid-cols-6 mb-8 bg-muted">
             <TabsTrigger value="students" className="flex items-center gap-2 data-[state=active]:bg-background">
               <Users className="w-4 h-4" />
               Alunos
@@ -35,6 +36,10 @@ const Index = () => {
             <TabsTrigger value="registry" className="flex items-center gap-2 data-[state=active]:bg-background">
               <Calendar className="w-4 h-4" />
               Registro de Aulas
+            </TabsTrigger>
+            <TabsTrigger value="absences" className="flex items-center gap-2 data-[state=active]:bg-background">
+              <UserX className="w-4 h-4" />
+              Gestão de Faltas
             </TabsTrigger>
             <TabsTrigger value="history" className="flex items-center gap-2 data-[state=active]:bg-background">
               <FileText className="w-4 h-4" />
@@ -58,12 +63,16 @@ const Index = () => {
             <ClassRegistry />
           </TabsContent>
 
+          <TabsContent value="absences" className="mt-6">
+            <AbsenceManager />
+          </TabsContent>
+
           <TabsContent value="history" className="mt-6">
             <AttendanceHistory />
           </TabsContent>
 
           <TabsContent value="reports" className="mt-6">
-            <ReportGenerator />
+            <VisualReportGenerator />
           </TabsContent>
         </Tabs>
       </div>

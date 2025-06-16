@@ -9,13 +9,57 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      absences: {
+        Row: {
+          absence_date: string
+          created_at: string | null
+          id: string
+          justified: boolean | null
+          reason: string | null
+          student_id: string | null
+          subject_id: string | null
+        }
+        Insert: {
+          absence_date: string
+          created_at?: string | null
+          id?: string
+          justified?: boolean | null
+          reason?: string | null
+          student_id?: string | null
+          subject_id?: string | null
+        }
+        Update: {
+          absence_date?: string
+          created_at?: string | null
+          id?: string
+          justified?: boolean | null
+          reason?: string | null
+          student_id?: string | null
+          subject_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "absences_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "absences_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       attendance_records: {
         Row: {
           class_session_id: string | null
           created_at: string | null
           id: string
           notes: string | null
-          present: boolean | null
           student_id: string | null
         }
         Insert: {
@@ -23,7 +67,6 @@ export type Database = {
           created_at?: string | null
           id?: string
           notes?: string | null
-          present?: boolean | null
           student_id?: string | null
         }
         Update: {
@@ -31,7 +74,6 @@ export type Database = {
           created_at?: string | null
           id?: string
           notes?: string | null
-          present?: boolean | null
           student_id?: string | null
         }
         Relationships: [

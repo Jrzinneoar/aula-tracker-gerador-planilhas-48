@@ -28,7 +28,16 @@ export interface AttendanceRecord {
   id: string;
   class_session_id: string;
   student_id: string;
-  present: boolean;
   notes?: string;
+  created_at: string;
+}
+
+export interface Absence {
+  id: string;
+  student_id: string;
+  subject_id: string;
+  absence_date: string;
+  reason?: string;
+  justified: boolean;
   created_at: string;
 }
