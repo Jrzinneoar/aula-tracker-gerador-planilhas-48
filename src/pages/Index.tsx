@@ -7,15 +7,16 @@ import SubjectManager from '@/components/SubjectManager';
 import ClassRegistry from '@/components/ClassRegistry';
 import AttendanceHistory from '@/components/AttendanceHistory';
 import AbsenceManager from '@/components/AbsenceManager';
+import ReportGenerator from '@/components/ReportGenerator';
 import VisualReportGenerator from '@/components/VisualReportGenerator';
-import { Users, BookOpen, Calendar, FileText, UserX, BarChart3 } from 'lucide-react';
+import { Users, BookOpen, Calendar, FileText, UserX, BarChart3, FileImage } from 'lucide-react';
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-2">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
             Sistema de Controle de Presença Escolar
           </h1>
           <p className="text-muted-foreground text-lg">
@@ -24,30 +25,34 @@ const Index = () => {
         </div>
 
         <Tabs defaultValue="students" className="w-full">
-          <TabsList className="grid w-full grid-cols-6 mb-8 bg-muted">
-            <TabsTrigger value="students" className="flex items-center gap-2 data-[state=active]:bg-background">
+          <TabsList className="grid w-full grid-cols-7 mb-8 bg-white/70 backdrop-blur-sm border border-blue-200">
+            <TabsTrigger value="students" className="flex items-center gap-2 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700">
               <Users className="w-4 h-4" />
               Alunos
             </TabsTrigger>
-            <TabsTrigger value="subjects" className="flex items-center gap-2 data-[state=active]:bg-background">
+            <TabsTrigger value="subjects" className="flex items-center gap-2 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700">
               <BookOpen className="w-4 h-4" />
               Matérias
             </TabsTrigger>
-            <TabsTrigger value="registry" className="flex items-center gap-2 data-[state=active]:bg-background">
+            <TabsTrigger value="registry" className="flex items-center gap-2 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700">
               <Calendar className="w-4 h-4" />
-              Registro de Aulas
+              Aulas
             </TabsTrigger>
-            <TabsTrigger value="absences" className="flex items-center gap-2 data-[state=active]:bg-background">
+            <TabsTrigger value="absences" className="flex items-center gap-2 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700">
               <UserX className="w-4 h-4" />
-              Gestão de Faltas
+              Faltas
             </TabsTrigger>
-            <TabsTrigger value="history" className="flex items-center gap-2 data-[state=active]:bg-background">
+            <TabsTrigger value="history" className="flex items-center gap-2 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700">
               <FileText className="w-4 h-4" />
               Histórico
             </TabsTrigger>
-            <TabsTrigger value="reports" className="flex items-center gap-2 data-[state=active]:bg-background">
+            <TabsTrigger value="reports" className="flex items-center gap-2 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700">
               <BarChart3 className="w-4 h-4" />
               Relatórios
+            </TabsTrigger>
+            <TabsTrigger value="visual-reports" className="flex items-center gap-2 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700">
+              <FileImage className="w-4 h-4" />
+              Rel. Visuais
             </TabsTrigger>
           </TabsList>
 
@@ -72,6 +77,10 @@ const Index = () => {
           </TabsContent>
 
           <TabsContent value="reports" className="mt-6">
+            <ReportGenerator />
+          </TabsContent>
+
+          <TabsContent value="visual-reports" className="mt-6">
             <VisualReportGenerator />
           </TabsContent>
         </Tabs>
