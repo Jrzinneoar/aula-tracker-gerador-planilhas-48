@@ -2,18 +2,60 @@
 import React, { useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Student, Subject, ClassSession } from '@/types';
-import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { Student, Subject, ClassSession, AttendanceRecord } from '@/types';
 import { toast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { FileText, Download } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 const ReportGenerator = () => {
-  const [students] = useLocalStorage<Student[]>('students', []);
-  const [subjects] = useLocalStorage<Subject[]>('subjects', []);
-  const [classSessions] = useLocalStorage<ClassSession[]>('classSessions', []);
+  const { data: students = [] } = useQuery({
+    queryKey: ['students'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('students')
+        .select('*')
+        .order('name');
+      if (error) throw error;
+      return data as Student[];
+    }
+  });
+
+  const { data: subjects = [] } = useQuery({
+    queryKey: ['subjects'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('subjects')
+        .select('*')
+        .order('name');
+      if (error) throw error;
+      return data as Subject[];
+    }
+  });
+
+  const { data: classSessions = [] } = useQuery({
+    queryKey: ['class_sessions'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('class_sessions')
+        .select(`
+          *,
+          subject:subjects(*),
+          attendance_records(
+            id,
+            student_id,
+            present,
+            notes,
+            created_at
+          )
+        `)
+        .order('date', { ascending: false });
+      if (error) throw error;
+      return data;
+    }
+  });
 
   const attendanceData = useMemo(() => {
     const data: Record<string, Record<string, { present: number; total: number; percentage: number }>> = {};
@@ -26,11 +68,11 @@ const ReportGenerator = () => {
     });
 
     classSessions.forEach(session => {
-      session.attendanceRecords.forEach(record => {
-        if (data[record.studentId] && data[record.studentId][record.subjectId]) {
-          data[record.studentId][record.subjectId].total++;
+      session.attendance_records?.forEach((record: any) => {
+        if (data[record.student_id] && data[record.student_id][session.subject_id]) {
+          data[record.student_id][session.subject_id].total++;
           if (record.present) {
-            data[record.studentId][record.subjectId].present++;
+            data[record.student_id][session.subject_id].present++;
           }
         }
       });
@@ -57,14 +99,13 @@ const ReportGenerator = () => {
       csvContent = 'Data,Matéria,Professor,Tópico,Aluno,Status,Observações\n';
       
       classSessions.forEach(session => {
-        const subject = subjects.find(s => s.id === session.subjectId);
         const sessionDate = format(new Date(session.date), 'dd/MM/yyyy');
         
-        session.attendanceRecords.forEach(record => {
-          const student = students.find(s => s.id === record.studentId);
+        session.attendance_records?.forEach((record: any) => {
+          const student = students.find(s => s.id === record.student_id);
           csvContent += `${sessionDate},`;
-          csvContent += `"${subject?.name || 'N/A'}",`;
-          csvContent += `"${subject?.teacher || 'N/A'}",`;
+          csvContent += `"${session.subject?.name || 'N/A'}",`;
+          csvContent += `"${session.subject?.teacher || 'N/A'}",`;
           csvContent += `"${session.topic}",`;
           csvContent += `"${student?.name || 'N/A'}",`;
           csvContent += `${record.present ? 'Presente' : 'Falta'},`;
@@ -80,7 +121,7 @@ const ReportGenerator = () => {
       csvContent += '\n';
 
       students.forEach(student => {
-        csvContent += `"${student.name}","${student.email}",`;
+        csvContent += `"${student.name}","${student.email || ''}",`;
         subjects.forEach(subject => {
           const stats = attendanceData[student.id]?.[subject.id] || { present: 0, total: 0, percentage: 0 };
           csvContent += `${stats.present},${stats.total},${stats.percentage}%,`;
@@ -109,26 +150,26 @@ const ReportGenerator = () => {
   if (classSessions.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500 text-lg">Nenhum dado para relatório.</p>
-        <p className="text-gray-400">Registre aulas primeiro para gerar relatórios.</p>
+        <p className="text-muted-foreground text-lg">Nenhum dado para relatório.</p>
+        <p className="text-muted-foreground/70">Registre aulas primeiro para gerar relatórios.</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-slate-800">Gerador de Relatórios</h2>
+      <h2 className="text-2xl font-bold text-foreground">Gerador de Relatórios</h2>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
+        <Card className="border-border bg-card">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-foreground">
               <FileText className="w-5 h-5" />
               Relatório Resumido
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               Gera uma planilha com o resumo de presenças por aluno e matéria, 
               mostrando percentual de presença.
             </p>
@@ -143,15 +184,15 @@ const ReportGenerator = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-border bg-card">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 text-foreground">
               <FileText className="w-5 h-5" />
               Relatório Detalhado
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               Gera uma planilha com todos os registros de aula, 
               incluindo data, tópico, presença e observações.
             </p>
@@ -166,18 +207,18 @@ const ReportGenerator = () => {
         </Card>
       </div>
 
-      <Card>
+      <Card className="border-border bg-card">
         <CardHeader>
-          <CardTitle>Preview - Resumo de Presenças</CardTitle>
+          <CardTitle className="text-foreground">Preview - Resumo de Presenças</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse border border-gray-200">
+            <table className="w-full border-collapse border border-border">
               <thead>
-                <tr className="bg-gray-50">
-                  <th className="border border-gray-200 p-2 text-left">Aluno</th>
+                <tr className="bg-muted">
+                  <th className="border border-border p-2 text-left text-foreground">Aluno</th>
                   {subjects.map(subject => (
-                    <th key={subject.id} className="border border-gray-200 p-2 text-center">
+                    <th key={subject.id} className="border border-border p-2 text-center text-foreground">
                       {subject.name}
                     </th>
                   ))}
@@ -186,13 +227,13 @@ const ReportGenerator = () => {
               <tbody>
                 {students.map(student => (
                   <tr key={student.id}>
-                    <td className="border border-gray-200 p-2 font-medium">
+                    <td className="border border-border p-2 font-medium text-foreground">
                       {student.name}
                     </td>
                     {subjects.map(subject => {
                       const stats = attendanceData[student.id]?.[subject.id] || { present: 0, total: 0, percentage: 0 };
                       return (
-                        <td key={subject.id} className="border border-gray-200 p-2 text-center">
+                        <td key={subject.id} className="border border-border p-2 text-center">
                           {stats.total > 0 ? (
                             <div className="space-y-1">
                               <div className={`font-medium ${
@@ -201,12 +242,12 @@ const ReportGenerator = () => {
                               }`}>
                                 {stats.percentage}%
                               </div>
-                              <div className="text-xs text-gray-500">
+                              <div className="text-xs text-muted-foreground">
                                 {stats.present}/{stats.total}
                               </div>
                             </div>
                           ) : (
-                            <span className="text-gray-400">-</span>
+                            <span className="text-muted-foreground">-</span>
                           )}
                         </td>
                       );
@@ -219,9 +260,9 @@ const ReportGenerator = () => {
         </CardContent>
       </Card>
 
-      <div className="bg-blue-50 p-4 rounded-lg">
-        <h3 className="font-semibold text-blue-800 mb-2">Como usar os relatórios:</h3>
-        <ul className="text-blue-700 text-sm space-y-1">
+      <div className="bg-muted p-4 rounded-lg border border-border">
+        <h3 className="font-semibold text-foreground mb-2">Como usar os relatórios:</h3>
+        <ul className="text-muted-foreground text-sm space-y-1">
           <li>• Os arquivos são baixados em formato CSV</li>
           <li>• Abra no Google Planilhas, Excel ou LibreOffice</li>
           <li>• O relatório resumido mostra percentuais de presença</li>
