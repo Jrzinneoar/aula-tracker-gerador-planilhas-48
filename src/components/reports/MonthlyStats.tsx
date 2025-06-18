@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { Users, TrendingDown, Award } from 'lucide-react';
 
 interface MonthlyStatsProps {
   students: any[];
@@ -34,52 +33,130 @@ const MonthlyStats = ({ students, filteredAbsences, getStudentTotalAbsences }: M
   const goodAttendance = studentsWithAbsences.filter(s => s.monthlyAbsences <= 1);
 
   return (
-    <div className="space-y-8">
+    <div style={{ marginBottom: '24px' }}>
       {/* Estatísticas destacadas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-        <div className="bg-red-50 p-4 rounded-lg border border-red-200 text-center">
-          <TrendingDown className="w-8 h-8 text-red-600 mx-auto mb-2" />
-          <div className="text-2xl font-bold text-red-600">{criticalStudents.length}</div>
-          <div className="text-sm text-red-800 font-medium">Alunos em Situação Crítica</div>
-          <div className="text-xs text-red-600 mt-1">(+5 faltas no mês)</div>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: '12px',
+        marginBottom: '24px'
+      }}>
+        <div style={{
+          padding: '16px',
+          borderRadius: '8px',
+          textAlign: 'center',
+          border: '2px solid #fca5a5',
+          backgroundColor: '#fee2e2',
+          color: '#dc2626'
+        }}>
+          <div style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '4px' }}>
+            {criticalStudents.length}
+          </div>
+          <div style={{ fontSize: '11px', fontWeight: '600' }}>
+            Alunos em Situação Crítica
+          </div>
+          <div style={{ fontSize: '9px', marginTop: '2px' }}>
+            (+5 faltas no mês)
+          </div>
         </div>
         
-        <div className="bg-green-50 p-4 rounded-lg border border-green-200 text-center">
-          <Award className="w-8 h-8 text-green-600 mx-auto mb-2" />
-          <div className="text-2xl font-bold text-green-600">{goodAttendance.length}</div>
-          <div className="text-sm text-green-800 font-medium">Boa Frequência</div>
-          <div className="text-xs text-green-600 mt-1">(0-1 faltas no mês)</div>
+        <div style={{
+          padding: '16px',
+          borderRadius: '8px',
+          textAlign: 'center',
+          border: '2px solid #86efac',
+          backgroundColor: '#dcfce7',
+          color: '#15803d'
+        }}>
+          <div style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '4px' }}>
+            {goodAttendance.length}
+          </div>
+          <div style={{ fontSize: '11px', fontWeight: '600' }}>
+            Boa Frequência
+          </div>
+          <div style={{ fontSize: '9px', marginTop: '2px' }}>
+            (0-1 faltas no mês)
+          </div>
         </div>
         
-        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200 text-center">
-          <Users className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-          <div className="text-2xl font-bold text-blue-600">
+        <div style={{
+          padding: '16px',
+          borderRadius: '8px',
+          textAlign: 'center',
+          border: '2px solid #93c5fd',
+          backgroundColor: '#dbeafe',
+          color: '#1e40af'
+        }}>
+          <div style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '4px' }}>
             {filteredAbsences.length > 0 ? Math.round(filteredAbsences.length / students.length * 10) / 10 : 0}
           </div>
-          <div className="text-sm text-blue-800 font-medium">Média de Faltas</div>
-          <div className="text-xs text-blue-600 mt-1">por aluno no mês</div>
+          <div style={{ fontSize: '11px', fontWeight: '600' }}>
+            Média de Faltas
+          </div>
+          <div style={{ fontSize: '9px', marginTop: '2px' }}>
+            por aluno no mês
+          </div>
         </div>
       </div>
 
       {/* Top 5 com mais faltas */}
       {topAbsentees.length > 0 && (
-        <div className="mb-8 break-inside-avoid">
-          <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2 border-b border-gray-200 pb-2">
-            <TrendingDown className="w-5 h-5 text-red-600" />
-            Alunos com Mais Faltas no Mês
+        <div style={{ marginBottom: '24px' }}>
+          <h3 style={{
+            fontSize: '16px',
+            fontWeight: 'bold',
+            color: '#1f2937',
+            marginBottom: '16px',
+            borderBottom: '2px solid #e5e7eb',
+            paddingBottom: '8px'
+          }}>
+            📊 Alunos com Mais Faltas no Mês
           </h3>
-          <div className="space-y-2">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             {topAbsentees.map((student, index) => (
-              <div key={student.id} className="flex items-center justify-between bg-red-50 p-3 rounded-lg border border-red-200">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center text-red-600 font-bold text-sm">
+              <div key={student.id} style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                backgroundColor: '#fef2f2',
+                padding: '12px',
+                borderRadius: '8px',
+                border: '1px solid #fecaca'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
+                  <div style={{
+                    width: '24px',
+                    height: '24px',
+                    backgroundColor: '#dc2626',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: '11px',
+                    flexShrink: 0
+                  }}>
                     {index + 1}º
                   </div>
-                  <div className="font-medium text-gray-800">{student.name}</div>
+                  <div style={{
+                    fontWeight: 'bold',
+                    color: '#1f2937',
+                    fontSize: '13px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {student.name}
+                  </div>
                 </div>
-                <div className="text-right">
-                  <div className="font-bold text-red-600">{student.monthlyAbsences} faltas</div>
-                  <div className="text-xs text-gray-500">Total: {student.totalAbsences}</div>
+                <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                  <div style={{ fontWeight: 'bold', color: '#dc2626', fontSize: '13px' }}>
+                    {student.monthlyAbsences} faltas
+                  </div>
+                  <div style={{ fontSize: '10px', color: '#6b7280' }}>
+                    Total: {student.totalAbsences}
+                  </div>
                 </div>
               </div>
             ))}
@@ -88,41 +165,119 @@ const MonthlyStats = ({ students, filteredAbsences, getStudentTotalAbsences }: M
       )}
 
       {/* Resumo detalhado por aluno */}
-      <div className="break-inside-avoid">
-        <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2 border-b border-gray-200 pb-2">
-          <Users className="w-5 h-5 text-purple-600" />
-          Resumo Detalhado por Aluno
+      <div>
+        <h3 style={{
+          fontSize: '16px',
+          fontWeight: 'bold',
+          color: '#1f2937',
+          marginBottom: '16px',
+          borderBottom: '2px solid #e5e7eb',
+          paddingBottom: '8px'
+        }}>
+          👥 Resumo Detalhado por Aluno
         </h3>
-        <div className="overflow-x-auto">
-          <table className="w-full border-collapse border border-gray-300 text-sm">
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{
+            width: '100%',
+            borderCollapse: 'collapse',
+            border: '1px solid #d1d5db',
+            fontSize: '11px',
+            backgroundColor: 'white'
+          }}>
             <thead>
-              <tr className="bg-gray-100">
-                <th className="border border-gray-300 p-3 text-left font-semibold">Aluno</th>
-                <th className="border border-gray-300 p-3 text-center font-semibold">Faltas no Mês</th>
-                <th className="border border-gray-300 p-3 text-center font-semibold">Total de Faltas</th>
-                <th className="border border-gray-300 p-3 text-center font-semibold">Status</th>
+              <tr style={{ backgroundColor: '#f9fafb' }}>
+                <th style={{
+                  border: '1px solid #d1d5db',
+                  padding: '8px',
+                  textAlign: 'left',
+                  fontWeight: 'bold',
+                  fontSize: '11px'
+                }}>
+                  Aluno
+                </th>
+                <th style={{
+                  border: '1px solid #d1d5db',
+                  padding: '8px',
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  fontSize: '11px'
+                }}>
+                  Faltas no Mês
+                </th>
+                <th style={{
+                  border: '1px solid #d1d5db',
+                  padding: '8px',
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  fontSize: '11px'
+                }}>
+                  Total de Faltas
+                </th>
+                <th style={{
+                  border: '1px solid #d1d5db',
+                  padding: '8px',
+                  textAlign: 'center',
+                  fontWeight: 'bold',
+                  fontSize: '11px'
+                }}>
+                  Status
+                </th>
               </tr>
             </thead>
             <tbody>
               {sortedByMonthlyAbsences.map((student) => (
-                <tr key={student.id} className="hover:bg-gray-50">
-                  <td className="border border-gray-300 p-3 font-medium">{student.name}</td>
-                  <td className="border border-gray-300 p-3 text-center">
-                    <span className={`font-semibold ${
-                      student.monthlyAbsences > 5 ? 'text-red-600' : 
-                      student.monthlyAbsences > 3 ? 'text-yellow-600' : 
-                      'text-green-600'
-                    }`}>
+                <tr key={student.id}>
+                  <td style={{
+                    border: '1px solid #d1d5db',
+                    padding: '8px',
+                    fontWeight: 'bold',
+                    fontSize: '11px',
+                    maxWidth: '120px',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap'
+                  }}>
+                    {student.name}
+                  </td>
+                  <td style={{
+                    border: '1px solid #d1d5db',
+                    padding: '8px',
+                    textAlign: 'center'
+                  }}>
+                    <span style={{
+                      fontWeight: 'bold',
+                      color: student.monthlyAbsences > 5 ? '#dc2626' : 
+                             student.monthlyAbsences > 3 ? '#d97706' : '#059669'
+                    }}>
                       {student.monthlyAbsences}
                     </span>
                   </td>
-                  <td className="border border-gray-300 p-3 text-center font-medium">{student.totalAbsences}</td>
-                  <td className="border border-gray-300 p-3 text-center">
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${
-                      student.status === 'Crítico' ? 'bg-red-100 text-red-800' : 
-                      student.status === 'Atenção' ? 'bg-yellow-100 text-yellow-800' : 
-                      'bg-green-100 text-green-800'
-                    }`}>
+                  <td style={{
+                    border: '1px solid #d1d5db',
+                    padding: '8px',
+                    textAlign: 'center',
+                    fontWeight: 'bold'
+                  }}>
+                    {student.totalAbsences}
+                  </td>
+                  <td style={{
+                    border: '1px solid #d1d5db',
+                    padding: '8px',
+                    textAlign: 'center'
+                  }}>
+                    <span style={{
+                      padding: '2px 6px',
+                      borderRadius: '12px',
+                      fontSize: '9px',
+                      fontWeight: 'bold',
+                      backgroundColor: student.status === 'Crítico' ? '#fee2e2' : 
+                                     student.status === 'Atenção' ? '#fef3c7' : '#dcfce7',
+                      color: student.status === 'Crítico' ? '#dc2626' : 
+                             student.status === 'Atenção' ? '#d97706' : '#059669',
+                      border: '1px solid',
+                      borderColor: student.status === 'Crítico' ? '#fecaca' : 
+                                  student.status === 'Atenção' ? '#fcd34d' : '#86efac'
+                    }}>
                       {student.status}
                     </span>
                   </td>

@@ -139,19 +139,19 @@ const VisualReportGenerator = () => {
     
     try {
       // Aguardar um momento para garantir que o DOM está renderizado
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise(resolve => setTimeout(resolve, 800));
       
       const canvas = await html2canvas(reportRef.current, {
         backgroundColor: '#ffffff',
-        scale: 1.5,
+        scale: 2,
         logging: false,
         useCORS: true,
         allowTaint: false,
         foreignObjectRendering: false,
         width: reportRef.current.scrollWidth,
         height: reportRef.current.scrollHeight,
-        windowWidth: 1200,
-        windowHeight: 1600,
+        windowWidth: 1400,
+        windowHeight: 2000,
         onclone: (clonedDoc) => {
           // Garantir que todos os estilos inline sejam aplicados
           const clonedElement = clonedDoc.querySelector('[data-report-content]') as HTMLElement;
@@ -159,13 +159,24 @@ const VisualReportGenerator = () => {
             clonedElement.style.fontFamily = 'Arial, sans-serif';
             clonedElement.style.color = '#000000';
             clonedElement.style.background = '#ffffff';
+            clonedElement.style.lineHeight = '1.4';
+            
+            // Garantir que todos os elementos tenham cores definidas
+            const allElements = clonedElement.querySelectorAll('*');
+            allElements.forEach((el: any) => {
+              if (el.style) {
+                if (!el.style.color && !el.style.backgroundColor) {
+                  el.style.color = '#000000';
+                }
+              }
+            });
           }
         }
       });
 
       const link = document.createElement('a');
       link.download = `relatorio_${reportType}_${format(new Date(), 'yyyy-MM-dd')}.png`;
-      link.href = canvas.toDataURL('image/png', 0.9);
+      link.href = canvas.toDataURL('image/png', 1.0);
       link.click();
 
       toast({
@@ -204,10 +215,10 @@ const VisualReportGenerator = () => {
   };
 
   // Limitar dados para evitar relatórios muito grandes
-  const limitedAbsences = filteredAbsences.slice(0, 20);
-  const limitedClasses = filteredClasses.slice(0, 15);
-  const hasMoreAbsences = filteredAbsences.length > 20;
-  const hasMoreClasses = filteredClasses.length > 15;
+  const limitedAbsences = filteredAbsences.slice(0, 15);
+  const limitedClasses = filteredClasses.slice(0, 12);
+  const hasMoreAbsences = filteredAbsences.length > 15;
+  const hasMoreClasses = filteredClasses.length > 12;
 
   return (
     <div className="space-y-6">
@@ -283,15 +294,15 @@ const VisualReportGenerator = () => {
             </div>
           </div>
 
-          {(filteredAbsences.length > 20 || filteredClasses.length > 15) && (
+          {(filteredAbsences.length > 15 || filteredClasses.length > 12) && (
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
               <p className="text-sm text-yellow-800">
                 <strong>Atenção:</strong> Este relatório contém muitos dados. Para melhor qualidade da imagem, 
-                serão exibidos apenas os primeiros {filteredClasses.length > 15 ? '15 aulas' : 'todas as aulas'} 
-                {filteredAbsences.length > 20 && filteredClasses.length > 15 ? ' e ' : ''}
-                {filteredAbsences.length > 20 ? '20 faltas' : ''}.
-                {hasMoreAbsences && ` (${filteredAbsences.length - 20} faltas não exibidas)`}
-                {hasMoreClasses && ` (${filteredClasses.length - 15} aulas não exibidas)`}
+                serão exibidos apenas os primeiros {filteredClasses.length > 12 ? '12 aulas' : 'todas as aulas'} 
+                {filteredAbsences.length > 15 && filteredClasses.length > 12 ? ' e ' : ''}
+                {filteredAbsences.length > 15 ? '15 faltas' : ''}.
+                {hasMoreAbsences && ` (${filteredAbsences.length - 15} faltas não exibidas)`}
+                {hasMoreClasses && ` (${filteredClasses.length - 12} aulas não exibidas)`}
               </p>
             </div>
           )}
@@ -325,13 +336,15 @@ const VisualReportGenerator = () => {
           color: '#000000',
           fontFamily: 'Arial, sans-serif',
           fontSize: '14px',
-          lineHeight: '1.4',
-          padding: '30px',
+          lineHeight: '1.5',
+          padding: '24px',
           maxWidth: '800px',
           margin: '0 auto',
           border: '1px solid #e5e7eb',
           borderRadius: '8px',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+          wordWrap: 'break-word',
+          overflow: 'hidden'
         }}
       >
         <ReportHeader logoUrl={logoUrl} title={getReportTitle()} />
@@ -345,15 +358,27 @@ const VisualReportGenerator = () => {
 
         <ClassesList classes={limitedClasses} />
         {hasMoreClasses && (
-          <div style={{ textAlign: 'center', color: '#6b7280', fontSize: '12px', marginBottom: '20px' }}>
-            ... e mais {filteredClasses.length - 15} aulas não exibidas
+          <div style={{ 
+            textAlign: 'center', 
+            color: '#6b7280', 
+            fontSize: '11px', 
+            marginBottom: '16px',
+            fontStyle: 'italic'
+          }}>
+            ... e mais {filteredClasses.length - 12} aulas não exibidas
           </div>
         )}
         
         <AbsencesList absences={limitedAbsences} />
         {hasMoreAbsences && (
-          <div style={{ textAlign: 'center', color: '#6b7280', fontSize: '12px', marginBottom: '20px' }}>
-            ... e mais {filteredAbsences.length - 20} faltas não exibidas
+          <div style={{ 
+            textAlign: 'center', 
+            color: '#6b7280', 
+            fontSize: '11px', 
+            marginBottom: '16px',
+            fontStyle: 'italic'
+          }}>
+            ... e mais {filteredAbsences.length - 15} faltas não exibidas
           </div>
         )}
 
