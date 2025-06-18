@@ -13,44 +13,44 @@ import { Users, BookOpen, Calendar, FileText, UserX, BarChart3, FileImage } from
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-white">
       <div className="container mx-auto px-4 py-8">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
-            Desenvolvimento de Sistemas
+          <h1 className="text-4xl font-bold text-black mb-2">
+            Sistema de Gestão Acadêmica
           </h1>
-          <p className="text-muted-foreground text-lg">
+          <p className="text-gray-600 text-lg">
             Gerencie alunos, matérias, registre aulas e controle faltas de forma simples e eficiente
           </p>
         </div>
 
         <Tabs defaultValue="students" className="w-full">
-          <TabsList className="grid w-full grid-cols-7 mb-8 bg-white/70 backdrop-blur-sm border border-blue-200">
-            <TabsTrigger value="students" className="flex items-center gap-2 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700">
+          <TabsList className="grid w-full grid-cols-7 mb-8 bg-gray-100 border border-gray-300">
+            <TabsTrigger value="students" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm">
               <Users className="w-4 h-4" />
               Alunos
             </TabsTrigger>
-            <TabsTrigger value="subjects" className="flex items-center gap-2 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700">
+            <TabsTrigger value="subjects" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm">
               <BookOpen className="w-4 h-4" />
               Matérias
             </TabsTrigger>
-            <TabsTrigger value="registry" className="flex items-center gap-2 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700">
+            <TabsTrigger value="registry" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm">
               <Calendar className="w-4 h-4" />
               Aulas
             </TabsTrigger>
-            <TabsTrigger value="absences" className="flex items-center gap-2 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700">
+            <TabsTrigger value="absences" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm">
               <UserX className="w-4 h-4" />
               Faltas
             </TabsTrigger>
-            <TabsTrigger value="history" className="flex items-center gap-2 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700">
+            <TabsTrigger value="history" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm">
               <FileText className="w-4 h-4" />
               Histórico
             </TabsTrigger>
-            <TabsTrigger value="reports" className="flex items-center gap-2 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700">
+            <TabsTrigger value="reports" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm">
               <BarChart3 className="w-4 h-4" />
-              Relatório Diário
+              Relatórios
             </TabsTrigger>
-            <TabsTrigger value="visual-reports" className="flex items-center gap-2 data-[state=active]:bg-blue-100 data-[state=active]:text-blue-700">
+            <TabsTrigger value="visual-reports" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm">
               <FileImage className="w-4 h-4" />
               Rel. Visuais
             </TabsTrigger>
@@ -90,3 +90,4 @@ const Index = () => {
 };
 
 export default Index;
+

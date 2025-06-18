@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,17 +5,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Student, Subject, Absence } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { FileImage, Download, Upload, X } from 'lucide-react';
+import { FileImage, Download, Upload, X, Settings } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import html2canvas from 'html2canvas';
-import ReportHeader from './reports/ReportHeader';
-import StatsSummary from './reports/StatsSummary';
-import ClassesList from './reports/ClassesList';
-import AbsencesList from './reports/AbsencesList';
-import MonthlyStats from './reports/MonthlyStats';
-import ReportFooter from './reports/ReportFooter';
 
 const VisualReportGenerator = () => {
   const [reportType, setReportType] = useState<'daily' | 'weekly' | 'monthly'>('daily');
@@ -138,7 +131,6 @@ const VisualReportGenerator = () => {
     setIsGenerating(true);
     
     try {
-      // Aguardar um momento para garantir que o DOM está renderizado
       await new Promise(resolve => setTimeout(resolve, 800));
       
       const canvas = await html2canvas(reportRef.current, {
@@ -147,31 +139,10 @@ const VisualReportGenerator = () => {
         logging: false,
         useCORS: true,
         allowTaint: false,
-        foreignObjectRendering: false,
         width: reportRef.current.scrollWidth,
         height: reportRef.current.scrollHeight,
-        windowWidth: 1400,
-        windowHeight: 2000,
-        onclone: (clonedDoc) => {
-          // Garantir que todos os estilos inline sejam aplicados
-          const clonedElement = clonedDoc.querySelector('[data-report-content]') as HTMLElement;
-          if (clonedElement) {
-            clonedElement.style.fontFamily = 'Arial, sans-serif';
-            clonedElement.style.color = '#000000';
-            clonedElement.style.background = '#ffffff';
-            clonedElement.style.lineHeight = '1.4';
-            
-            // Garantir que todos os elementos tenham cores definidas
-            const allElements = clonedElement.querySelectorAll('*');
-            allElements.forEach((el: any) => {
-              if (el.style) {
-                if (!el.style.color && !el.style.backgroundColor) {
-                  el.style.color = '#000000';
-                }
-              }
-            });
-          }
-        }
+        windowWidth: 1200,
+        windowHeight: 1600
       });
 
       const link = document.createElement('a');
@@ -195,10 +166,6 @@ const VisualReportGenerator = () => {
     }
   };
 
-  const getStudentTotalAbsences = (studentId: string) => {
-    return absences.filter((absence: any) => absence.student_id === studentId).length;
-  };
-
   const { filteredAbsences, filteredClasses, startDate, endDate } = getFilteredData();
 
   const getReportTitle = () => {
@@ -214,52 +181,52 @@ const VisualReportGenerator = () => {
     }
   };
 
-  // Limitar dados para evitar relatórios muito grandes
-  const limitedAbsences = filteredAbsences.slice(0, 15);
-  const limitedClasses = filteredClasses.slice(0, 12);
-  const hasMoreAbsences = filteredAbsences.length > 15;
-  const hasMoreClasses = filteredClasses.length > 12;
+  const limitedAbsences = filteredAbsences.slice(0, 10);
+  const limitedClasses = filteredClasses.slice(0, 8);
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-foreground">Relatórios Visuais</h2>
+    <div className="space-y-6 bg-white">
+      <div className="bg-white border-b border-gray-200 pb-6">
+        <h2 className="text-3xl font-bold text-black mb-2">Relatórios Visuais</h2>
+        <p className="text-gray-600">Gere relatórios visuais organizados e profissionais</p>
+      </div>
 
-      <Card className="bg-card border-border">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-card-foreground">
-            <FileImage className="w-5 h-5" />
+      <Card className="bg-white border border-gray-200 shadow-sm">
+        <CardHeader className="bg-gray-50 border-b border-gray-200">
+          <CardTitle className="flex items-center gap-2 text-black">
+            <Settings className="w-5 h-5" />
             Configurações do Relatório
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium text-card-foreground">Tipo de Relatório</label>
+        <CardContent className="p-6 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-black">Tipo de Relatório</label>
               <Select value={reportType} onValueChange={(value: any) => setReportType(value)}>
-                <SelectTrigger className="bg-background border-border text-foreground">
+                <SelectTrigger className="bg-white border-gray-300 text-black">
                   <SelectValue />
                 </SelectTrigger>
-                <SelectContent className="bg-popover border-border">
-                  <SelectItem value="daily" className="text-popover-foreground">Relatório Diário</SelectItem>
-                  <SelectItem value="weekly" className="text-popover-foreground">Relatório Semanal</SelectItem>
-                  <SelectItem value="monthly" className="text-popover-foreground">Relatório Mensal</SelectItem>
+                <SelectContent className="bg-white border-gray-300">
+                  <SelectItem value="daily" className="text-black">Relatório Diário</SelectItem>
+                  <SelectItem value="weekly" className="text-black">Relatório Semanal</SelectItem>
+                  <SelectItem value="monthly" className="text-black">Relatório Mensal</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div>
-              <label className="text-sm font-medium text-card-foreground">Data de Referência</label>
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-black">Data de Referência</label>
               <input
                 type="date"
                 value={selectedDate}
                 onChange={(e) => setSelectedDate(e.target.value)}
-                className="w-full px-3 py-2 bg-background border border-border rounded-md text-foreground"
+                className="w-full px-3 py-2 bg-white border border-gray-300 rounded-md text-black focus:ring-2 focus:ring-black focus:border-black"
               />
             </div>
           </div>
 
-          <div>
-            <label className="text-sm font-medium text-card-foreground mb-2 block">Logo da Instituição</label>
+          <div className="space-y-2">
+            <label className="text-sm font-semibold text-black">Logo da Instituição</label>
             <div className="flex items-center gap-4">
               <input
                 ref={fileInputRef}
@@ -272,20 +239,20 @@ const VisualReportGenerator = () => {
                 type="button"
                 variant="outline"
                 onClick={() => fileInputRef.current?.click()}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 border-gray-300 text-black hover:bg-gray-50"
               >
                 <Upload className="w-4 h-4" />
                 Escolher Logo
               </Button>
               {logoUrl && (
                 <div className="flex items-center gap-2">
-                  <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain border rounded" />
+                  <img src={logoUrl} alt="Logo" className="w-12 h-12 object-contain border border-gray-300 rounded" />
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
                     onClick={removeLogo}
-                    className="text-red-500 hover:text-red-700"
+                    className="text-gray-500 hover:text-red-600"
                   >
                     <X className="w-4 h-4" />
                   </Button>
@@ -294,22 +261,9 @@ const VisualReportGenerator = () => {
             </div>
           </div>
 
-          {(filteredAbsences.length > 15 || filteredClasses.length > 12) && (
-            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-              <p className="text-sm text-yellow-800">
-                <strong>Atenção:</strong> Este relatório contém muitos dados. Para melhor qualidade da imagem, 
-                serão exibidos apenas os primeiros {filteredClasses.length > 12 ? '12 aulas' : 'todas as aulas'} 
-                {filteredAbsences.length > 15 && filteredClasses.length > 12 ? ' e ' : ''}
-                {filteredAbsences.length > 15 ? '15 faltas' : ''}.
-                {hasMoreAbsences && ` (${filteredAbsences.length - 15} faltas não exibidas)`}
-                {hasMoreClasses && ` (${filteredClasses.length - 12} aulas não exibidas)`}
-              </p>
-            </div>
-          )}
-
           <Button 
             onClick={generateReport} 
-            className="w-full" 
+            className="w-full bg-black text-white hover:bg-gray-800" 
             disabled={isGenerating}
           >
             {isGenerating ? (
@@ -328,70 +282,272 @@ const VisualReportGenerator = () => {
       </Card>
 
       {/* Preview do Relatório */}
-      <div 
-        ref={reportRef} 
-        data-report-content
-        style={{ 
-          backgroundColor: '#ffffff',
-          color: '#000000',
-          fontFamily: 'Arial, sans-serif',
-          fontSize: '14px',
-          lineHeight: '1.5',
-          padding: '24px',
-          maxWidth: '800px',
-          margin: '0 auto',
-          border: '1px solid #e5e7eb',
-          borderRadius: '8px',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-          wordWrap: 'break-word',
-          overflow: 'hidden'
-        }}
-      >
-        <ReportHeader logoUrl={logoUrl} title={getReportTitle()} />
-        
-        <StatsSummary
-          totalStudents={students.length}
-          totalClasses={limitedClasses.length}
-          totalAbsences={limitedAbsences.length}
-          unjustifiedAbsences={limitedAbsences.filter((a: any) => !a.justified).length}
-        />
+      <Card className="bg-white border border-gray-200 shadow-sm">
+        <CardHeader className="bg-gray-50 border-b border-gray-200">
+          <CardTitle className="text-black">Preview do Relatório</CardTitle>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div 
+            ref={reportRef} 
+            className="report-container"
+            style={{ 
+              backgroundColor: '#ffffff',
+              color: '#000000',
+              fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
+              fontSize: '14px',
+              lineHeight: '1.5',
+              padding: '32px',
+              maxWidth: '800px',
+              margin: '0 auto',
+              border: '2px solid #000000',
+              borderRadius: '8px'
+            }}
+          >
+            {/* Header */}
+            <div style={{
+              textAlign: 'center',
+              marginBottom: '32px',
+              borderBottom: '3px solid #000000',
+              paddingBottom: '24px'
+            }}>
+              {logoUrl ? (
+                <div style={{ marginBottom: '16px' }}>
+                  <img 
+                    src={logoUrl} 
+                    alt="Logo da Instituição" 
+                    style={{
+                      maxWidth: '200px',
+                      maxHeight: '80px',
+                      objectFit: 'contain',
+                      display: 'block',
+                      margin: '0 auto'
+                    }}
+                  />
+                </div>
+              ) : (
+                <h1 style={{
+                  fontSize: '32px',
+                  fontWeight: 'bold',
+                  color: '#000000',
+                  marginBottom: '8px',
+                  margin: '0 0 8px 0'
+                }}>
+                  Sistema de Gestão Acadêmica
+                </h1>
+              )}
+              <h2 style={{
+                fontSize: '24px',
+                color: '#000000',
+                fontWeight: '600',
+                marginBottom: '8px',
+                margin: '0 0 8px 0'
+              }}>
+                {getReportTitle()}
+              </h2>
+              <p style={{
+                fontSize: '14px',
+                color: '#666666',
+                margin: '0'
+              }}>
+                Gerado em {format(new Date(), "dd/MM/yyyy 'às' HH:mm")}
+              </p>
+            </div>
 
-        <ClassesList classes={limitedClasses} />
-        {hasMoreClasses && (
-          <div style={{ 
-            textAlign: 'center', 
-            color: '#6b7280', 
-            fontSize: '11px', 
-            marginBottom: '16px',
-            fontStyle: 'italic'
-          }}>
-            ... e mais {filteredClasses.length - 12} aulas não exibidas
+            {/* Estatísticas Resumidas */}
+            <div className="report-section">
+              <h3 className="report-title">📊 Resumo Estatístico</h3>
+              <div className="report-stats-grid">
+                <div className="report-stat-card" style={{
+                  backgroundColor: '#f8f9fa',
+                  borderColor: '#000000',
+                  color: '#000000'
+                }}>
+                  <div style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '4px' }}>
+                    {students.length}
+                  </div>
+                  <div style={{ fontSize: '12px', fontWeight: '500' }}>
+                    Total de Alunos
+                  </div>
+                </div>
+                
+                <div className="report-stat-card" style={{
+                  backgroundColor: '#f8f9fa',
+                  borderColor: '#000000',
+                  color: '#000000'
+                }}>
+                  <div style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '4px' }}>
+                    {limitedClasses.length}
+                  </div>
+                  <div style={{ fontSize: '12px', fontWeight: '500' }}>
+                    Aulas no Período
+                  </div>
+                </div>
+                
+                <div className="report-stat-card" style={{
+                  backgroundColor: '#f8f9fa',
+                  borderColor: '#000000',
+                  color: '#000000'
+                }}>
+                  <div style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '4px' }}>
+                    {limitedAbsences.length}
+                  </div>
+                  <div style={{ fontSize: '12px', fontWeight: '500' }}>
+                    Faltas no Período
+                  </div>
+                </div>
+                
+                <div className="report-stat-card" style={{
+                  backgroundColor: '#f8f9fa',
+                  borderColor: '#000000',
+                  color: '#000000'
+                }}>
+                  <div style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '4px' }}>
+                    {limitedAbsences.filter((a: any) => !a.justified).length}
+                  </div>
+                  <div style={{ fontSize: '12px', fontWeight: '500' }}>
+                    Faltas Não Justificadas
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Aulas */}
+            {limitedClasses.length > 0 && (
+              <div className="report-section">
+                <h3 className="report-title">📚 Aulas Realizadas</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {limitedClasses.map((session: any) => (
+                    <div key={session.id} style={{
+                      backgroundColor: '#ffffff',
+                      padding: '16px',
+                      border: '2px solid #000000',
+                      borderRadius: '8px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{
+                          fontWeight: 'bold',
+                          color: '#000000',
+                          fontSize: '16px',
+                          marginBottom: '4px'
+                        }}>
+                          {session.subject?.name}
+                        </div>
+                        <div style={{
+                          fontSize: '14px',
+                          color: '#666666',
+                          marginBottom: '4px'
+                        }}>
+                          {session.topic}
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{
+                          fontSize: '14px',
+                          fontWeight: 'bold',
+                          color: '#000000'
+                        }}>
+                          {format(new Date(session.date), 'dd/MM/yyyy')}
+                        </div>
+                        <div style={{
+                          fontSize: '12px',
+                          color: '#666666'
+                        }}>
+                          {session.attendance_records?.length || 0} presentes
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Faltas */}
+            {limitedAbsences.length > 0 && (
+              <div className="report-section">
+                <h3 className="report-title">❌ Faltas Registradas</h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {limitedAbsences.map((absence: any) => (
+                    <div key={absence.id} style={{
+                      backgroundColor: '#ffffff',
+                      padding: '16px',
+                      border: '2px solid #000000',
+                      borderRadius: '8px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <div style={{ flex: 1 }}>
+                        <div style={{
+                          fontWeight: 'bold',
+                          color: '#000000',
+                          fontSize: '16px',
+                          marginBottom: '4px'
+                        }}>
+                          {absence.student?.name}
+                        </div>
+                        {absence.reason && (
+                          <div style={{
+                            fontSize: '14px',
+                            color: '#666666'
+                          }}>
+                            {absence.reason}
+                          </div>
+                        )}
+                      </div>
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{
+                          fontSize: '14px',
+                          fontWeight: 'bold',
+                          color: '#000000',
+                          marginBottom: '4px'
+                        }}>
+                          {format(new Date(absence.absence_date), 'dd/MM/yyyy')}
+                        </div>
+                        <div style={{
+                          fontSize: '12px',
+                          padding: '4px 8px',
+                          border: '1px solid #000000',
+                          borderRadius: '4px',
+                          backgroundColor: absence.justified ? '#ffffff' : '#f5f5f5',
+                          color: '#000000'
+                        }}>
+                          {absence.justified ? 'Justificada' : 'Não Justificada'}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Footer */}
+            <div style={{
+              marginTop: '32px',
+              paddingTop: '24px',
+              borderTop: '2px solid #000000',
+              textAlign: 'center'
+            }}>
+              <p style={{
+                fontSize: '12px',
+                color: '#666666',
+                margin: '0 0 8px 0'
+              }}>
+                Sistema de Gestão Acadêmica - Relatório gerado automaticamente
+              </p>
+              <p style={{
+                fontSize: '10px',
+                color: '#999999',
+                margin: '0'
+              }}>
+                Este documento contém informações confidenciais da instituição de ensino
+              </p>
+            </div>
           </div>
-        )}
-        
-        <AbsencesList absences={limitedAbsences} />
-        {hasMoreAbsences && (
-          <div style={{ 
-            textAlign: 'center', 
-            color: '#6b7280', 
-            fontSize: '11px', 
-            marginBottom: '16px',
-            fontStyle: 'italic'
-          }}>
-            ... e mais {filteredAbsences.length - 15} faltas não exibidas
-          </div>
-        )}
-
-        {reportType === 'monthly' && (
-          <MonthlyStats
-            students={students}
-            filteredAbsences={filteredAbsences}
-            getStudentTotalAbsences={getStudentTotalAbsences}
-          />
-        )}
-
-        <ReportFooter />
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
