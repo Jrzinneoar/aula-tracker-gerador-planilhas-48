@@ -1,3 +1,4 @@
+
 import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -5,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Student, Subject, Absence } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { FileImage, Download, Upload, X, Settings } from 'lucide-react';
+import { FileImage, Download, Upload, X, Settings, AlertCircle } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -93,13 +94,13 @@ const VisualReportGenerator = () => {
   };
 
   const getFilteredData = () => {
-    const selectedDateObj = new Date(selectedDate);
+    const selectedDateObj = new Date(selectedDate + 'T12:00:00'); // Fix timezone issues
     let startDate: Date, endDate: Date;
 
     switch (reportType) {
       case 'daily':
-        startDate = new Date(selectedDate);
-        endDate = new Date(selectedDate);
+        startDate = new Date(selectedDate + 'T00:00:00');
+        endDate = new Date(selectedDate + 'T23:59:59');
         break;
       case 'weekly':
         startDate = startOfWeek(selectedDateObj, { weekStartsOn: 1 });
@@ -110,17 +111,19 @@ const VisualReportGenerator = () => {
         endDate = endOfMonth(selectedDateObj);
         break;
       default:
-        startDate = new Date(selectedDate);
-        endDate = new Date(selectedDate);
+        startDate = new Date(selectedDate + 'T00:00:00');
+        endDate = new Date(selectedDate + 'T23:59:59');
     }
 
-    const filteredAbsences = absences.filter((absence: any) =>
-      isWithinInterval(new Date(absence.absence_date), { start: startDate, end: endDate })
-    );
+    const filteredAbsences = absences.filter((absence: any) => {
+      const absenceDate = new Date(absence.absence_date + 'T12:00:00');
+      return isWithinInterval(absenceDate, { start: startDate, end: endDate });
+    });
 
-    const filteredClasses = classSessions.filter((session: any) =>
-      isWithinInterval(new Date(session.date), { start: startDate, end: endDate })
-    );
+    const filteredClasses = classSessions.filter((session: any) => {
+      const sessionDate = new Date(session.date + 'T12:00:00');
+      return isWithinInterval(sessionDate, { start: startDate, end: endDate });
+    });
 
     return { filteredAbsences, filteredClasses, startDate, endDate };
   };
@@ -142,7 +145,9 @@ const VisualReportGenerator = () => {
         width: reportRef.current.scrollWidth,
         height: reportRef.current.scrollHeight,
         windowWidth: 1200,
-        windowHeight: 1600
+        windowHeight: 1600,
+        scrollX: 0,
+        scrollY: 0
       });
 
       const link = document.createElement('a');
@@ -171,9 +176,9 @@ const VisualReportGenerator = () => {
   const getReportTitle = () => {
     switch (reportType) {
       case 'daily':
-        return `Relatório Diário - ${format(startDate, 'dd/MM/yyyy')}`;
+        return `Relatório Diário - ${format(startDate, 'dd/MM/yyyy', { locale: ptBR })}`;
       case 'weekly':
-        return `Relatório Semanal - ${format(startDate, 'dd/MM/yyyy')} a ${format(endDate, 'dd/MM/yyyy')}`;
+        return `Relatório Semanal - ${format(startDate, 'dd/MM/yyyy', { locale: ptBR })} a ${format(endDate, 'dd/MM/yyyy', { locale: ptBR })}`;
       case 'monthly':
         return `Relatório Mensal - ${format(startDate, 'MMMM yyyy', { locale: ptBR })}`;
       default:
@@ -181,8 +186,10 @@ const VisualReportGenerator = () => {
     }
   };
 
-  const limitedAbsences = filteredAbsences.slice(0, 10);
-  const limitedClasses = filteredClasses.slice(0, 8);
+  const limitedAbsences = filteredAbsences.slice(0, 12);
+  const limitedClasses = filteredClasses.slice(0, 10);
+
+  const hasLimitedData = filteredAbsences.length > 12 || filteredClasses.length > 10;
 
   return (
     <div className="space-y-6 bg-white">
@@ -261,6 +268,15 @@ const VisualReportGenerator = () => {
             </div>
           </div>
 
+          {hasLimitedData && (
+            <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+              <AlertCircle className="w-4 h-4 text-yellow-600" />
+              <p className="text-sm text-yellow-800">
+                Dados limitados para melhor qualidade da imagem: {limitedClasses.length} aulas e {limitedAbsences.length} faltas mostradas
+              </p>
+            </div>
+          )}
+
           <Button 
             onClick={generateReport} 
             className="w-full bg-black text-white hover:bg-gray-800" 
@@ -289,7 +305,6 @@ const VisualReportGenerator = () => {
         <CardContent className="p-6">
           <div 
             ref={reportRef} 
-            className="report-container"
             style={{ 
               backgroundColor: '#ffffff',
               color: '#000000',
@@ -300,7 +315,8 @@ const VisualReportGenerator = () => {
               maxWidth: '800px',
               margin: '0 auto',
               border: '2px solid #000000',
-              borderRadius: '8px'
+              borderRadius: '8px',
+              boxSizing: 'border-box'
             }}
           >
             {/* Header */}
@@ -326,18 +342,18 @@ const VisualReportGenerator = () => {
                 </div>
               ) : (
                 <h1 style={{
-                  fontSize: '32px',
+                  fontSize: '28px',
                   fontWeight: 'bold',
                   color: '#000000',
                   marginBottom: '8px',
                   margin: '0 0 8px 0'
                 }}>
-                  Sistema de Gestão Acadêmica
+                  Desenvolvimento de Sistemas
                 </h1>
               )}
               <h2 style={{
-                fontSize: '24px',
-                color: '#000000',
+                fontSize: '22px',
+                color: '#1e40af',
                 fontWeight: '600',
                 marginBottom: '8px',
                 margin: '0 0 8px 0'
@@ -349,62 +365,90 @@ const VisualReportGenerator = () => {
                 color: '#666666',
                 margin: '0'
               }}>
-                Gerado em {format(new Date(), "dd/MM/yyyy 'às' HH:mm")}
+                Gerado em {format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
               </p>
             </div>
 
             {/* Estatísticas Resumidas */}
-            <div className="report-section">
-              <h3 className="report-title">📊 Resumo Estatístico</h3>
-              <div className="report-stats-grid">
-                <div className="report-stat-card" style={{
-                  backgroundColor: '#f8f9fa',
-                  borderColor: '#000000',
-                  color: '#000000'
+            <div style={{ marginBottom: '32px' }}>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: 'bold',
+                color: '#000000',
+                marginBottom: '16px',
+                borderBottom: '2px solid #e5e7eb',
+                paddingBottom: '8px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                📊 Resumo Estatístico
+              </h3>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: '16px'
+              }}>
+                <div style={{
+                  padding: '20px',
+                  borderRadius: '8px',
+                  textAlign: 'center',
+                  border: '2px solid #3b82f6',
+                  backgroundColor: '#dbeafe',
+                  color: '#1e40af'
                 }}>
-                  <div style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '4px' }}>
+                  <div style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>
                     {students.length}
                   </div>
-                  <div style={{ fontSize: '12px', fontWeight: '500' }}>
+                  <div style={{ fontSize: '14px', fontWeight: '600' }}>
                     Total de Alunos
                   </div>
                 </div>
                 
-                <div className="report-stat-card" style={{
-                  backgroundColor: '#f8f9fa',
-                  borderColor: '#000000',
-                  color: '#000000'
+                <div style={{
+                  padding: '20px',
+                  borderRadius: '8px',
+                  textAlign: 'center',
+                  border: '2px solid #10b981',
+                  backgroundColor: '#d1fae5',
+                  color: '#059669'
                 }}>
-                  <div style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '4px' }}>
+                  <div style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>
                     {limitedClasses.length}
                   </div>
-                  <div style={{ fontSize: '12px', fontWeight: '500' }}>
+                  <div style={{ fontSize: '14px', fontWeight: '600' }}>
                     Aulas no Período
                   </div>
                 </div>
                 
-                <div className="report-stat-card" style={{
-                  backgroundColor: '#f8f9fa',
-                  borderColor: '#000000',
-                  color: '#000000'
+                <div style={{
+                  padding: '20px',
+                  borderRadius: '8px',
+                  textAlign: 'center',
+                  border: '2px solid #ef4444',
+                  backgroundColor: '#fee2e2',
+                  color: '#dc2626'
                 }}>
-                  <div style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '4px' }}>
+                  <div style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>
                     {limitedAbsences.length}
                   </div>
-                  <div style={{ fontSize: '12px', fontWeight: '500' }}>
+                  <div style={{ fontSize: '14px', fontWeight: '600' }}>
                     Faltas no Período
                   </div>
                 </div>
                 
-                <div className="report-stat-card" style={{
-                  backgroundColor: '#f8f9fa',
-                  borderColor: '#000000',
-                  color: '#000000'
+                <div style={{
+                  padding: '20px',
+                  borderRadius: '8px',
+                  textAlign: 'center',
+                  border: '2px solid #f59e0b',
+                  backgroundColor: '#fef3c7',
+                  color: '#d97706'
                 }}>
-                  <div style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '4px' }}>
+                  <div style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>
                     {limitedAbsences.filter((a: any) => !a.justified).length}
                   </div>
-                  <div style={{ fontSize: '12px', fontWeight: '500' }}>
+                  <div style={{ fontSize: '14px', fontWeight: '600' }}>
                     Faltas Não Justificadas
                   </div>
                 </div>
@@ -413,47 +457,88 @@ const VisualReportGenerator = () => {
 
             {/* Aulas */}
             {limitedClasses.length > 0 && (
-              <div className="report-section">
-                <h3 className="report-title">📚 Aulas Realizadas</h3>
+              <div style={{ marginBottom: '32px' }}>
+                <h3 style={{
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  color: '#000000',
+                  marginBottom: '16px',
+                  borderBottom: '2px solid #e5e7eb',
+                  paddingBottom: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  📚 Aulas Realizadas
+                </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {limitedClasses.map((session: any) => (
                     <div key={session.id} style={{
-                      backgroundColor: '#ffffff',
+                      backgroundColor: '#f8fafc',
                       padding: '16px',
-                      border: '2px solid #000000',
+                      border: '2px solid #e2e8f0',
                       borderRadius: '8px',
                       display: 'flex',
                       justifyContent: 'space-between',
-                      alignItems: 'center'
+                      alignItems: 'flex-start',
+                      wordWrap: 'break-word',
+                      overflow: 'hidden',
+                      boxSizing: 'border-box'
                     }}>
-                      <div style={{ flex: 1 }}>
+                      <div style={{
+                        flex: 1,
+                        paddingRight: '16px',
+                        minWidth: 0,
+                        wordWrap: 'break-word'
+                      }}>
                         <div style={{
                           fontWeight: 'bold',
-                          color: '#000000',
+                          color: '#1e40af',
                           fontSize: '16px',
-                          marginBottom: '4px'
+                          marginBottom: '6px',
+                          wordWrap: 'break-word'
                         }}>
                           {session.subject?.name}
                         </div>
                         <div style={{
                           fontSize: '14px',
-                          color: '#666666',
-                          marginBottom: '4px'
+                          color: '#4b5563',
+                          marginBottom: '4px',
+                          wordWrap: 'break-word'
                         }}>
                           {session.topic}
                         </div>
+                        {session.notes && (
+                          <div style={{
+                            fontSize: '12px',
+                            color: '#6b7280',
+                            fontStyle: 'italic',
+                            wordWrap: 'break-word'
+                          }}>
+                            {session.notes}
+                          </div>
+                        )}
                       </div>
-                      <div style={{ textAlign: 'right' }}>
+                      <div style={{
+                        textAlign: 'right',
+                        flexShrink: 0,
+                        minWidth: '100px'
+                      }}>
                         <div style={{
                           fontSize: '14px',
                           fontWeight: 'bold',
-                          color: '#000000'
+                          color: '#000000',
+                          marginBottom: '4px'
                         }}>
-                          {format(new Date(session.date), 'dd/MM/yyyy')}
+                          {format(new Date(session.date + 'T12:00:00'), 'dd/MM/yyyy')}
                         </div>
                         <div style={{
                           fontSize: '12px',
-                          color: '#666666'
+                          color: '#059669',
+                          backgroundColor: '#d1fae5',
+                          padding: '4px 8px',
+                          borderRadius: '12px',
+                          border: '1px solid #86efac'
                         }}>
                           {session.attendance_records?.length || 0} presentes
                         </div>
@@ -466,53 +551,80 @@ const VisualReportGenerator = () => {
 
             {/* Faltas */}
             {limitedAbsences.length > 0 && (
-              <div className="report-section">
-                <h3 className="report-title">❌ Faltas Registradas</h3>
+              <div style={{ marginBottom: '32px' }}>
+                <h3 style={{
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  color: '#000000',
+                  marginBottom: '16px',
+                  borderBottom: '2px solid #e5e7eb',
+                  paddingBottom: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  ❌ Faltas Registradas
+                </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {limitedAbsences.map((absence: any) => (
                     <div key={absence.id} style={{
-                      backgroundColor: '#ffffff',
+                      backgroundColor: '#fef2f2',
                       padding: '16px',
-                      border: '2px solid #000000',
+                      border: '2px solid #fecaca',
                       borderRadius: '8px',
                       display: 'flex',
                       justifyContent: 'space-between',
-                      alignItems: 'center'
+                      alignItems: 'flex-start',
+                      wordWrap: 'break-word',
+                      overflow: 'hidden',
+                      boxSizing: 'border-box'
                     }}>
-                      <div style={{ flex: 1 }}>
+                      <div style={{
+                        flex: 1,
+                        paddingRight: '16px',
+                        minWidth: 0,
+                        wordWrap: 'break-word'
+                      }}>
                         <div style={{
                           fontWeight: 'bold',
-                          color: '#000000',
+                          color: '#dc2626',
                           fontSize: '16px',
-                          marginBottom: '4px'
+                          marginBottom: '6px',
+                          wordWrap: 'break-word'
                         }}>
                           {absence.student?.name}
                         </div>
                         {absence.reason && (
                           <div style={{
                             fontSize: '14px',
-                            color: '#666666'
+                            color: '#4b5563',
+                            wordWrap: 'break-word'
                           }}>
                             {absence.reason}
                           </div>
                         )}
                       </div>
-                      <div style={{ textAlign: 'right' }}>
+                      <div style={{
+                        textAlign: 'right',
+                        flexShrink: 0,
+                        minWidth: '120px'
+                      }}>
                         <div style={{
                           fontSize: '14px',
                           fontWeight: 'bold',
                           color: '#000000',
                           marginBottom: '4px'
                         }}>
-                          {format(new Date(absence.absence_date), 'dd/MM/yyyy')}
+                          {format(new Date(absence.absence_date + 'T12:00:00'), 'dd/MM/yyyy')}
                         </div>
                         <div style={{
                           fontSize: '12px',
                           padding: '4px 8px',
-                          border: '1px solid #000000',
-                          borderRadius: '4px',
-                          backgroundColor: absence.justified ? '#ffffff' : '#f5f5f5',
-                          color: '#000000'
+                          border: '1px solid',
+                          borderRadius: '12px',
+                          backgroundColor: absence.justified ? '#d1fae5' : '#fee2e2',
+                          color: absence.justified ? '#059669' : '#dc2626',
+                          borderColor: absence.justified ? '#86efac' : '#fecaca'
                         }}>
                           {absence.justified ? 'Justificada' : 'Não Justificada'}
                         </div>
@@ -535,7 +647,7 @@ const VisualReportGenerator = () => {
                 color: '#666666',
                 margin: '0 0 8px 0'
               }}>
-                Sistema de Gestão Acadêmica - Relatório gerado automaticamente
+                Desenvolvimento de Sistemas - Relatório gerado automaticamente
               </p>
               <p style={{
                 fontSize: '10px',
