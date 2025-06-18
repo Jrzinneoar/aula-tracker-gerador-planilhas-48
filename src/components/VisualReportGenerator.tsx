@@ -1,3 +1,4 @@
+
 import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -21,6 +22,7 @@ const VisualReportGenerator = () => {
   const [reportType, setReportType] = useState<'daily' | 'weekly' | 'monthly'>('daily');
   const [selectedDate, setSelectedDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [logoUrl, setLogoUrl] = useState<string>('');
+  const [isGenerating, setIsGenerating] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -132,22 +134,38 @@ const VisualReportGenerator = () => {
 
   const generateReport = async () => {
     if (!reportRef.current) return;
-
+    
+    setIsGenerating(true);
+    
     try {
+      // Aguardar um momento para garantir que o DOM está renderizado
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
       const canvas = await html2canvas(reportRef.current, {
         backgroundColor: '#ffffff',
-        scale: 2,
+        scale: 1.5,
         logging: false,
         useCORS: true,
-        allowTaint: true,
-        foreignObjectRendering: true,
+        allowTaint: false,
+        foreignObjectRendering: false,
         width: reportRef.current.scrollWidth,
-        height: reportRef.current.scrollHeight
+        height: reportRef.current.scrollHeight,
+        windowWidth: 1200,
+        windowHeight: 1600,
+        onclone: (clonedDoc) => {
+          // Garantir que todos os estilos inline sejam aplicados
+          const clonedElement = clonedDoc.querySelector('[data-report-content]') as HTMLElement;
+          if (clonedElement) {
+            clonedElement.style.fontFamily = 'Arial, sans-serif';
+            clonedElement.style.color = '#000000';
+            clonedElement.style.background = '#ffffff';
+          }
+        }
       });
 
       const link = document.createElement('a');
       link.download = `relatorio_${reportType}_${format(new Date(), 'yyyy-MM-dd')}.png`;
-      link.href = canvas.toDataURL('image/png', 1.0);
+      link.href = canvas.toDataURL('image/png', 0.9);
       link.click();
 
       toast({
@@ -161,6 +179,8 @@ const VisualReportGenerator = () => {
         description: "Erro ao gerar relatório visual",
         variant: "destructive"
       });
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -182,6 +202,12 @@ const VisualReportGenerator = () => {
         return 'Relatório';
     }
   };
+
+  // Limitar dados para evitar relatórios muito grandes
+  const limitedAbsences = filteredAbsences.slice(0, 20);
+  const limitedClasses = filteredClasses.slice(0, 15);
+  const hasMoreAbsences = filteredAbsences.length > 20;
+  const hasMoreClasses = filteredClasses.length > 15;
 
   return (
     <div className="space-y-6">
@@ -257,9 +283,35 @@ const VisualReportGenerator = () => {
             </div>
           </div>
 
-          <Button onClick={generateReport} className="w-full">
-            <Download className="w-4 h-4 mr-2" />
-            Gerar e Baixar Relatório Visual
+          {(filteredAbsences.length > 20 || filteredClasses.length > 15) && (
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+              <p className="text-sm text-yellow-800">
+                <strong>Atenção:</strong> Este relatório contém muitos dados. Para melhor qualidade da imagem, 
+                serão exibidos apenas os primeiros {filteredClasses.length > 15 ? '15 aulas' : 'todas as aulas'} 
+                {filteredAbsences.length > 20 && filteredClasses.length > 15 ? ' e ' : ''}
+                {filteredAbsences.length > 20 ? '20 faltas' : ''}.
+                {hasMoreAbsences && ` (${filteredAbsences.length - 20} faltas não exibidas)`}
+                {hasMoreClasses && ` (${filteredClasses.length - 15} aulas não exibidas)`}
+              </p>
+            </div>
+          )}
+
+          <Button 
+            onClick={generateReport} 
+            className="w-full" 
+            disabled={isGenerating}
+          >
+            {isGenerating ? (
+              <>
+                <div className="w-4 h-4 mr-2 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Gerando Relatório...
+              </>
+            ) : (
+              <>
+                <Download className="w-4 h-4 mr-2" />
+                Gerar e Baixar Relatório Visual
+              </>
+            )}
           </Button>
         </CardContent>
       </Card>
@@ -267,27 +319,43 @@ const VisualReportGenerator = () => {
       {/* Preview do Relatório */}
       <div 
         ref={reportRef} 
-        className="bg-white p-8 rounded-lg shadow-lg max-w-4xl mx-auto" 
+        data-report-content
         style={{ 
+          backgroundColor: '#ffffff',
+          color: '#000000',
           fontFamily: 'Arial, sans-serif',
-          minHeight: '297mm',
-          width: '210mm',
-          boxSizing: 'border-box',
-          pageBreakInside: 'avoid'
+          fontSize: '14px',
+          lineHeight: '1.4',
+          padding: '30px',
+          maxWidth: '800px',
+          margin: '0 auto',
+          border: '1px solid #e5e7eb',
+          borderRadius: '8px',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
         }}
       >
         <ReportHeader logoUrl={logoUrl} title={getReportTitle()} />
         
         <StatsSummary
           totalStudents={students.length}
-          totalClasses={filteredClasses.length}
-          totalAbsences={filteredAbsences.length}
-          unjustifiedAbsences={filteredAbsences.filter((a: any) => !a.justified).length}
+          totalClasses={limitedClasses.length}
+          totalAbsences={limitedAbsences.length}
+          unjustifiedAbsences={limitedAbsences.filter((a: any) => !a.justified).length}
         />
 
-        <ClassesList classes={filteredClasses} />
+        <ClassesList classes={limitedClasses} />
+        {hasMoreClasses && (
+          <div style={{ textAlign: 'center', color: '#6b7280', fontSize: '12px', marginBottom: '20px' }}>
+            ... e mais {filteredClasses.length - 15} aulas não exibidas
+          </div>
+        )}
         
-        <AbsencesList absences={filteredAbsences} />
+        <AbsencesList absences={limitedAbsences} />
+        {hasMoreAbsences && (
+          <div style={{ textAlign: 'center', color: '#6b7280', fontSize: '12px', marginBottom: '20px' }}>
+            ... e mais {filteredAbsences.length - 20} faltas não exibidas
+          </div>
+        )}
 
         {reportType === 'monthly' && (
           <MonthlyStats

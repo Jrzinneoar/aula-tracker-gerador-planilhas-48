@@ -9,25 +9,51 @@ interface ReportHeaderProps {
 
 const ReportHeader = ({ logoUrl, title }: ReportHeaderProps) => {
   return (
-    <div className="text-center mb-8 border-b border-gray-200 pb-6">
+    <div style={{
+      textAlign: 'center',
+      marginBottom: '30px',
+      borderBottom: '2px solid #e5e7eb',
+      paddingBottom: '20px'
+    }}>
       {logoUrl ? (
-        <div className="flex justify-center mb-4">
+        <div style={{ marginBottom: '16px' }}>
           <img 
             src={logoUrl} 
             alt="Logo da Instituição" 
-            className="max-w-48 max-h-24 object-contain"
-            style={{ maxWidth: '192px', maxHeight: '96px' }}
+            style={{
+              maxWidth: '180px',
+              maxHeight: '80px',
+              objectFit: 'contain',
+              display: 'block',
+              margin: '0 auto'
+            }}
           />
         </div>
       ) : (
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">
+        <h1 style={{
+          fontSize: '28px',
+          fontWeight: 'bold',
+          color: '#1f2937',
+          marginBottom: '8px',
+          margin: '0 0 8px 0'
+        }}>
           Desenvolvimento de Sistemas
         </h1>
       )}
-      <h2 className="text-xl text-blue-600 font-semibold mb-2">
+      <h2 style={{
+        fontSize: '20px',
+        color: '#2563eb',
+        fontWeight: '600',
+        marginBottom: '8px',
+        margin: '0 0 8px 0'
+      }}>
         {title}
       </h2>
-      <p className="text-sm text-gray-500">
+      <p style={{
+        fontSize: '12px',
+        color: '#6b7280',
+        margin: '0'
+      }}>
         Gerado em {format(new Date(), "dd/MM/yyyy 'às' HH:mm")}
       </p>
     </div>
