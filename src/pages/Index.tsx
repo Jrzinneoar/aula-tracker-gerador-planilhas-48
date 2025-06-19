@@ -1,7 +1,7 @@
 
-import React from 'react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
+import Navbar from '@/components/Navbar';
 import StudentManager from '@/components/StudentManager';
 import SubjectManager from '@/components/SubjectManager';
 import ClassRegistry from '@/components/ClassRegistry';
@@ -9,85 +9,92 @@ import AttendanceHistory from '@/components/AttendanceHistory';
 import AbsenceManager from '@/components/AbsenceManager';
 import ReportGenerator from '@/components/ReportGenerator';
 import VisualReportGenerator from '@/components/VisualReportGenerator';
-import { Users, BookOpen, Calendar, FileText, UserX, BarChart3, FileImage } from 'lucide-react';
 
 const Index = () => {
+  const [activeTab, setActiveTab] = useState('students');
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case 'students':
+        return <StudentManager />;
+      case 'subjects':
+        return <SubjectManager />;
+      case 'registry':
+        return <ClassRegistry />;
+      case 'absences':
+        return <AbsenceManager />;
+      case 'history':
+        return <AttendanceHistory />;
+      case 'reports':
+        return <ReportGenerator />;
+      case 'visual-reports':
+        return <VisualReportGenerator />;
+      default:
+        return <StudentManager />;
+    }
+  };
+
+  const getPageTitle = () => {
+    const titles = {
+      students: 'Gerenciamento de Alunos',
+      subjects: 'Gerenciamento de Matérias',
+      registry: 'Registro de Aulas',
+      absences: 'Controle de Faltas',
+      history: 'Histórico de Presenças',
+      reports: 'Relatórios do Sistema',
+      'visual-reports': 'Relatórios Visuais'
+    };
+    return titles[activeTab as keyof typeof titles] || 'Sistema Acadêmico';
+  };
+
+  const getPageDescription = () => {
+    const descriptions = {
+      students: 'Cadastre e gerencie informações dos alunos',
+      subjects: 'Organize e controle as matérias do curso',
+      registry: 'Registre aulas e controle de presença',
+      absences: 'Gerencie faltas e justificativas',
+      history: 'Visualize o histórico completo de presenças',
+      reports: 'Gere relatórios detalhados do sistema',
+      'visual-reports': 'Crie relatórios visuais personalizados'
+    };
+    return descriptions[activeTab as keyof typeof descriptions] || 'Gestão acadêmica inteligente';
+  };
+
   return (
-    <div className="min-h-screen bg-white">
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-black mb-2">
-            Sistema de Gestão Acadêmica
-          </h1>
-          <p className="text-gray-600 text-lg">
-            Gerencie alunos, matérias, registre aulas e controle faltas de forma simples e eficiente
-          </p>
+    <div className="min-h-screen bg-background">
+      <Navbar activeTab={activeTab} onTabChange={setActiveTab} />
+      
+      {/* Main Content */}
+      <div className="pt-20 md:pt-24">
+        <div className="container mx-auto px-4 py-8">
+          {/* Page Header */}
+          <div className="text-center mb-12 animate-fade-in-up">
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 glow-text">
+              {getPageTitle()}
+            </h1>
+            <p className="text-white/70 text-lg md:text-xl max-w-2xl mx-auto">
+              {getPageDescription()}
+            </p>
+            <div className="mt-6 h-1 w-24 bg-gradient-to-r from-white/50 to-transparent mx-auto rounded-full"></div>
+          </div>
+
+          {/* Content Card */}
+          <Card className="glass-card glow-border animate-scale-in">
+            <CardContent className="p-6 md:p-8">
+              {renderContent()}
+            </CardContent>
+          </Card>
         </div>
+      </div>
 
-        <Tabs defaultValue="students" className="w-full">
-          <TabsList className="grid w-full grid-cols-7 mb-8 bg-gray-100 border border-gray-300">
-            <TabsTrigger value="students" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm">
-              <Users className="w-4 h-4" />
-              Alunos
-            </TabsTrigger>
-            <TabsTrigger value="subjects" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm">
-              <BookOpen className="w-4 h-4" />
-              Matérias
-            </TabsTrigger>
-            <TabsTrigger value="registry" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm">
-              <Calendar className="w-4 h-4" />
-              Aulas
-            </TabsTrigger>
-            <TabsTrigger value="absences" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm">
-              <UserX className="w-4 h-4" />
-              Faltas
-            </TabsTrigger>
-            <TabsTrigger value="history" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm">
-              <FileText className="w-4 h-4" />
-              Histórico
-            </TabsTrigger>
-            <TabsTrigger value="reports" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm">
-              <BarChart3 className="w-4 h-4" />
-              Relatórios
-            </TabsTrigger>
-            <TabsTrigger value="visual-reports" className="flex items-center gap-2 data-[state=active]:bg-white data-[state=active]:text-black data-[state=active]:shadow-sm">
-              <FileImage className="w-4 h-4" />
-              Rel. Visuais
-            </TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="students" className="mt-6">
-            <StudentManager />
-          </TabsContent>
-
-          <TabsContent value="subjects" className="mt-6">
-            <SubjectManager />
-          </TabsContent>
-
-          <TabsContent value="registry" className="mt-6">
-            <ClassRegistry />
-          </TabsContent>
-
-          <TabsContent value="absences" className="mt-6">
-            <AbsenceManager />
-          </TabsContent>
-
-          <TabsContent value="history" className="mt-6">
-            <AttendanceHistory />
-          </TabsContent>
-
-          <TabsContent value="reports" className="mt-6">
-            <ReportGenerator />
-          </TabsContent>
-
-          <TabsContent value="visual-reports" className="mt-6">
-            <VisualReportGenerator />
-          </TabsContent>
-        </Tabs>
+      {/* Background Decorations */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden">
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-white/3 rounded-full blur-3xl"></div>
+        <div className="absolute top-3/4 left-1/3 w-32 h-32 bg-white/10 rounded-full blur-2xl"></div>
       </div>
     </div>
   );
 };
 
 export default Index;
-
