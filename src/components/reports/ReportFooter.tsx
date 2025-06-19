@@ -14,7 +14,7 @@ const ReportFooter = () => {
         color: '#6b7280',
         margin: '0 0 4px 0'
       }}>
-        Desenvolvimento de Sistemas - Relatório gerado automaticamente
+        System Tb - Relatório gerado automaticamente
       </p>
       <p style={{
         fontSize: '10px',

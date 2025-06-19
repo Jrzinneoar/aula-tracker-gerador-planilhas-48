@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Student, Subject, Absence } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { FileImage, Download, Upload, X, Settings, AlertCircle } from 'lucide-react';
+import { FileImage, Download, Upload, X, Settings, AlertCircle, TrendingUp, Users, BookOpen, Calendar } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -94,7 +94,7 @@ const VisualReportGenerator = () => {
   };
 
   const getFilteredData = () => {
-    const selectedDateObj = new Date(selectedDate + 'T12:00:00'); // Fix timezone issues
+    const selectedDateObj = new Date(selectedDate + 'T12:00:00');
     let startDate: Date, endDate: Date;
 
     switch (reportType) {
@@ -137,7 +137,7 @@ const VisualReportGenerator = () => {
       await new Promise(resolve => setTimeout(resolve, 800));
       
       const canvas = await html2canvas(reportRef.current, {
-        backgroundColor: '#ffffff',
+        backgroundColor: '#000000',
         scale: 2,
         logging: false,
         useCORS: true,
@@ -185,6 +185,15 @@ const VisualReportGenerator = () => {
         return 'Relatório';
     }
   };
+
+  // Estatísticas avançadas
+  const attendanceRate = filteredClasses.length > 0 ? 
+    ((filteredClasses.reduce((sum: number, cls: any) => sum + (cls.attendance_records?.length || 0), 0) / 
+      (filteredClasses.length * students.length)) * 100) : 0;
+
+  const subjectsWithClasses = [...new Set(filteredClasses.map((cls: any) => cls.subject?.name))].length;
+  const studentsWithAbsences = [...new Set(filteredAbsences.map((abs: any) => abs.student_id))].length;
+  const averageAbsencesPerStudent = students.length > 0 ? (filteredAbsences.length / students.length) : 0;
 
   const limitedAbsences = filteredAbsences.slice(0, 12);
   const limitedClasses = filteredClasses.slice(0, 10);
@@ -306,150 +315,302 @@ const VisualReportGenerator = () => {
           <div 
             ref={reportRef} 
             style={{ 
-              backgroundColor: '#ffffff',
-              color: '#000000',
+              backgroundColor: '#000000',
+              color: '#ffffff',
               fontFamily: '"Segoe UI", Tahoma, Geneva, Verdana, sans-serif',
               fontSize: '14px',
-              lineHeight: '1.5',
-              padding: '32px',
-              maxWidth: '800px',
+              lineHeight: '1.6',
+              padding: '40px',
+              maxWidth: '900px',
               margin: '0 auto',
-              border: '2px solid #000000',
-              borderRadius: '8px',
-              boxSizing: 'border-box'
+              border: '3px solid #ffffff',
+              borderRadius: '12px',
+              boxSizing: 'border-box',
+              position: 'relative',
+              overflow: 'hidden'
             }}
           >
+            {/* Brush effects */}
+            <div style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '4px',
+              background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.8) 20%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0.8) 80%, transparent 100%)',
+              transform: 'skewX(-15deg)',
+              transformOrigin: 'left'
+            }} />
+            
+            <div style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: '4px',
+              background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 30%, rgba(255, 255, 255, 0.3) 50%, rgba(255, 255, 255, 0.6) 70%, transparent 100%)',
+              transform: 'skewX(15deg)',
+              transformOrigin: 'right'
+            }} />
+
             {/* Header */}
             <div style={{
               textAlign: 'center',
-              marginBottom: '32px',
-              borderBottom: '3px solid #000000',
-              paddingBottom: '24px'
+              marginBottom: '40px',
+              borderBottom: '2px solid #ffffff',
+              paddingBottom: '24px',
+              position: 'relative'
             }}>
+              <div style={{
+                position: 'absolute',
+                bottom: '-2px',
+                left: '20%',
+                right: '20%',
+                height: '2px',
+                background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.8) 50%, transparent 100%)',
+                transform: 'scaleX(1.2)'
+              }} />
+              
               {logoUrl ? (
-                <div style={{ marginBottom: '16px' }}>
+                <div style={{ marginBottom: '20px' }}>
                   <img 
                     src={logoUrl} 
                     alt="Logo da Instituição" 
                     style={{
-                      maxWidth: '200px',
-                      maxHeight: '80px',
+                      maxWidth: '220px',
+                      maxHeight: '90px',
                       objectFit: 'contain',
                       display: 'block',
-                      margin: '0 auto'
+                      margin: '0 auto',
+                      filter: 'brightness(1.1) contrast(1.1)'
                     }}
                   />
                 </div>
               ) : (
                 <h1 style={{
-                  fontSize: '28px',
+                  fontSize: '32px',
                   fontWeight: 'bold',
-                  color: '#000000',
-                  marginBottom: '8px',
-                  margin: '0 0 8px 0'
+                  color: '#ffffff',
+                  marginBottom: '12px',
+                  margin: '0 0 12px 0',
+                  textShadow: '2px 2px 4px rgba(255, 255, 255, 0.1)'
                 }}>
-                  Desenvolvimento de Sistemas
+                  System Tb
                 </h1>
               )}
               <h2 style={{
-                fontSize: '22px',
-                color: '#1e40af',
+                fontSize: '24px',
+                color: '#ffffff',
                 fontWeight: '600',
-                marginBottom: '8px',
-                margin: '0 0 8px 0'
+                marginBottom: '12px',
+                margin: '0 0 12px 0',
+                textShadow: '1px 1px 2px rgba(255, 255, 255, 0.1)'
               }}>
                 {getReportTitle()}
               </h2>
               <p style={{
                 fontSize: '14px',
-                color: '#666666',
+                color: '#cccccc',
                 margin: '0'
               }}>
                 Gerado em {format(new Date(), "dd/MM/yyyy 'às' HH:mm", { locale: ptBR })}
               </p>
             </div>
 
-            {/* Estatísticas Resumidas */}
-            <div style={{ marginBottom: '32px' }}>
+            {/* Estatísticas Principais */}
+            <div style={{ marginBottom: '40px' }}>
               <h3 style={{
-                fontSize: '18px',
+                fontSize: '20px',
                 fontWeight: 'bold',
-                color: '#000000',
-                marginBottom: '16px',
-                borderBottom: '2px solid #e5e7eb',
-                paddingBottom: '8px',
+                color: '#ffffff',
+                marginBottom: '20px',
+                borderBottom: '2px solid rgba(255, 255, 255, 0.3)',
+                paddingBottom: '10px',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '12px',
+                position: 'relative'
               }}>
-                📊 Resumo Estatístico
+                <TrendingUp style={{ width: '20px', height: '20px' }} />
+                Estatísticas Gerais
+                <div style={{
+                  position: 'absolute',
+                  bottom: '-2px',
+                  left: 0,
+                  width: '60px',
+                  height: '2px',
+                  background: 'linear-gradient(90deg, rgba(255, 255, 255, 0.8) 0%, transparent 100%)'
+                }} />
               </h3>
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(2, 1fr)',
-                gap: '16px'
+                gap: '20px'
               }}>
                 <div style={{
-                  padding: '20px',
-                  borderRadius: '8px',
+                  padding: '24px',
+                  borderRadius: '12px',
                   textAlign: 'center',
-                  border: '2px solid #3b82f6',
-                  backgroundColor: '#dbeafe',
-                  color: '#1e40af'
+                  border: '2px solid rgba(255, 255, 255, 0.3)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  position: 'relative',
+                  overflow: 'hidden'
                 }}>
-                  <div style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: '1px',
+                    background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 50%, transparent 100%)'
+                  }} />
+                  <Users style={{ width: '24px', height: '24px', margin: '0 auto 8px', color: '#ffffff' }} />
+                  <div style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '8px', color: '#ffffff' }}>
                     {students.length}
                   </div>
-                  <div style={{ fontSize: '14px', fontWeight: '600' }}>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#cccccc' }}>
                     Total de Alunos
                   </div>
                 </div>
                 
                 <div style={{
-                  padding: '20px',
-                  borderRadius: '8px',
+                  padding: '24px',
+                  borderRadius: '12px',
                   textAlign: 'center',
-                  border: '2px solid #10b981',
-                  backgroundColor: '#d1fae5',
-                  color: '#059669'
+                  border: '2px solid rgba(255, 255, 255, 0.3)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  position: 'relative',
+                  overflow: 'hidden'
                 }}>
-                  <div style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: '1px',
+                    background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 50%, transparent 100%)'
+                  }} />
+                  <Calendar style={{ width: '24px', height: '24px', margin: '0 auto 8px', color: '#ffffff' }} />
+                  <div style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '8px', color: '#ffffff' }}>
                     {limitedClasses.length}
                   </div>
-                  <div style={{ fontSize: '14px', fontWeight: '600' }}>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#cccccc' }}>
                     Aulas no Período
                   </div>
                 </div>
                 
                 <div style={{
-                  padding: '20px',
-                  borderRadius: '8px',
+                  padding: '24px',
+                  borderRadius: '12px',
                   textAlign: 'center',
-                  border: '2px solid #ef4444',
-                  backgroundColor: '#fee2e2',
-                  color: '#dc2626'
+                  border: '2px solid rgba(255, 255, 255, 0.3)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  position: 'relative',
+                  overflow: 'hidden'
                 }}>
-                  <div style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>
-                    {limitedAbsences.length}
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: '1px',
+                    background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 50%, transparent 100%)'
+                  }} />
+                  <div style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '8px', color: '#ffffff' }}>
+                    {Math.round(attendanceRate)}%
                   </div>
-                  <div style={{ fontSize: '14px', fontWeight: '600' }}>
-                    Faltas no Período
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#cccccc' }}>
+                    Taxa de Presença
                   </div>
                 </div>
                 
                 <div style={{
-                  padding: '20px',
+                  padding: '24px',
+                  borderRadius: '12px',
+                  textAlign: 'center',
+                  border: '2px solid rgba(255, 255, 255, 0.3)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: '1px',
+                    background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 50%, transparent 100%)'
+                  }} />
+                  <BookOpen style={{ width: '24px', height: '24px', margin: '0 auto 8px', color: '#ffffff' }} />
+                  <div style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '8px', color: '#ffffff' }}>
+                    {subjectsWithClasses}
+                  </div>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: '#cccccc' }}>
+                    Matérias Ativas
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Estatísticas Detalhadas */}
+            <div style={{ marginBottom: '40px' }}>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: 'bold',
+                color: '#ffffff',
+                marginBottom: '20px',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                paddingBottom: '8px'
+              }}>
+                Análise Detalhada
+              </h3>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: '16px'
+              }}>
+                <div style={{
+                  padding: '16px',
                   borderRadius: '8px',
                   textAlign: 'center',
-                  border: '2px solid #f59e0b',
-                  backgroundColor: '#fef3c7',
-                  color: '#d97706'
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.03)'
                 }}>
-                  <div style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>
-                    {limitedAbsences.filter((a: any) => !a.justified).length}
+                  <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px', color: '#ffffff' }}>
+                    {limitedAbsences.length}
                   </div>
-                  <div style={{ fontSize: '14px', fontWeight: '600' }}>
-                    Faltas Não Justificadas
+                  <div style={{ fontSize: '12px', fontWeight: '600', color: '#cccccc' }}>
+                    Total de Faltas
+                  </div>
+                </div>
+                
+                <div style={{
+                  padding: '16px',
+                  borderRadius: '8px',
+                  textAlign: 'center',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.03)'
+                }}>
+                  <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px', color: '#ffffff' }}>
+                    {studentsWithAbsences}
+                  </div>
+                  <div style={{ fontSize: '12px', fontWeight: '600', color: '#cccccc' }}>
+                    Alunos com Faltas
+                  </div>
+                </div>
+                
+                <div style={{
+                  padding: '16px',
+                  borderRadius: '8px',
+                  textAlign: 'center',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  backgroundColor: 'rgba(255, 255, 255, 0.03)'
+                }}>
+                  <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px', color: '#ffffff' }}>
+                    {Math.round(averageAbsencesPerStudent * 10) / 10}
+                  </div>
+                  <div style={{ fontSize: '12px', fontWeight: '600', color: '#cccccc' }}>
+                    Média Faltas/Aluno
                   </div>
                 </div>
               </div>
@@ -457,26 +618,23 @@ const VisualReportGenerator = () => {
 
             {/* Aulas */}
             {limitedClasses.length > 0 && (
-              <div style={{ marginBottom: '32px' }}>
+              <div style={{ marginBottom: '40px' }}>
                 <h3 style={{
                   fontSize: '18px',
                   fontWeight: 'bold',
-                  color: '#000000',
-                  marginBottom: '16px',
-                  borderBottom: '2px solid #e5e7eb',
-                  paddingBottom: '8px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
+                  color: '#ffffff',
+                  marginBottom: '20px',
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                  paddingBottom: '8px'
                 }}>
-                  📚 Aulas Realizadas
+                  Aulas Realizadas
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {limitedClasses.map((session: any) => (
                     <div key={session.id} style={{
-                      backgroundColor: '#f8fafc',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
                       padding: '16px',
-                      border: '2px solid #e2e8f0',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
                       borderRadius: '8px',
                       display: 'flex',
                       justifyContent: 'space-between',
@@ -493,7 +651,7 @@ const VisualReportGenerator = () => {
                       }}>
                         <div style={{
                           fontWeight: 'bold',
-                          color: '#1e40af',
+                          color: '#ffffff',
                           fontSize: '16px',
                           marginBottom: '6px',
                           wordWrap: 'break-word'
@@ -502,7 +660,7 @@ const VisualReportGenerator = () => {
                         </div>
                         <div style={{
                           fontSize: '14px',
-                          color: '#4b5563',
+                          color: '#cccccc',
                           marginBottom: '4px',
                           wordWrap: 'break-word'
                         }}>
@@ -511,7 +669,7 @@ const VisualReportGenerator = () => {
                         {session.notes && (
                           <div style={{
                             fontSize: '12px',
-                            color: '#6b7280',
+                            color: '#aaaaaa',
                             fontStyle: 'italic',
                             wordWrap: 'break-word'
                           }}>
@@ -527,18 +685,18 @@ const VisualReportGenerator = () => {
                         <div style={{
                           fontSize: '14px',
                           fontWeight: 'bold',
-                          color: '#000000',
+                          color: '#ffffff',
                           marginBottom: '4px'
                         }}>
                           {format(new Date(session.date + 'T12:00:00'), 'dd/MM/yyyy')}
                         </div>
                         <div style={{
                           fontSize: '12px',
-                          color: '#059669',
-                          backgroundColor: '#d1fae5',
+                          color: '#ffffff',
+                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
                           padding: '4px 8px',
                           borderRadius: '12px',
-                          border: '1px solid #86efac'
+                          border: '1px solid rgba(255, 255, 255, 0.2)'
                         }}>
                           {session.attendance_records?.length || 0} presentes
                         </div>
@@ -551,26 +709,23 @@ const VisualReportGenerator = () => {
 
             {/* Faltas */}
             {limitedAbsences.length > 0 && (
-              <div style={{ marginBottom: '32px' }}>
+              <div style={{ marginBottom: '40px' }}>
                 <h3 style={{
                   fontSize: '18px',
                   fontWeight: 'bold',
-                  color: '#000000',
-                  marginBottom: '16px',
-                  borderBottom: '2px solid #e5e7eb',
-                  paddingBottom: '8px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
+                  color: '#ffffff',
+                  marginBottom: '20px',
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                  paddingBottom: '8px'
                 }}>
-                  ❌ Faltas Registradas
+                  Faltas Registradas
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                   {limitedAbsences.map((absence: any) => (
                     <div key={absence.id} style={{
-                      backgroundColor: '#fef2f2',
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
                       padding: '16px',
-                      border: '2px solid #fecaca',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
                       borderRadius: '8px',
                       display: 'flex',
                       justifyContent: 'space-between',
@@ -587,7 +742,7 @@ const VisualReportGenerator = () => {
                       }}>
                         <div style={{
                           fontWeight: 'bold',
-                          color: '#dc2626',
+                          color: '#ffffff',
                           fontSize: '16px',
                           marginBottom: '6px',
                           wordWrap: 'break-word'
@@ -597,7 +752,7 @@ const VisualReportGenerator = () => {
                         {absence.reason && (
                           <div style={{
                             fontSize: '14px',
-                            color: '#4b5563',
+                            color: '#cccccc',
                             wordWrap: 'break-word'
                           }}>
                             {absence.reason}
@@ -612,7 +767,7 @@ const VisualReportGenerator = () => {
                         <div style={{
                           fontSize: '14px',
                           fontWeight: 'bold',
-                          color: '#000000',
+                          color: '#ffffff',
                           marginBottom: '4px'
                         }}>
                           {format(new Date(absence.absence_date + 'T12:00:00'), 'dd/MM/yyyy')}
@@ -622,9 +777,9 @@ const VisualReportGenerator = () => {
                           padding: '4px 8px',
                           border: '1px solid',
                           borderRadius: '12px',
-                          backgroundColor: absence.justified ? '#d1fae5' : '#fee2e2',
-                          color: absence.justified ? '#059669' : '#dc2626',
-                          borderColor: absence.justified ? '#86efac' : '#fecaca'
+                          backgroundColor: absence.justified ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                          color: absence.justified ? '#ffffff' : '#cccccc',
+                          borderColor: absence.justified ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.2)'
                         }}>
                           {absence.justified ? 'Justificada' : 'Não Justificada'}
                         </div>
@@ -637,21 +792,30 @@ const VisualReportGenerator = () => {
 
             {/* Footer */}
             <div style={{
-              marginTop: '32px',
+              marginTop: '40px',
               paddingTop: '24px',
-              borderTop: '2px solid #000000',
-              textAlign: 'center'
+              borderTop: '2px solid rgba(255, 255, 255, 0.3)',
+              textAlign: 'center',
+              position: 'relative'
             }}>
+              <div style={{
+                position: 'absolute',
+                top: '-2px',
+                left: '30%',
+                right: '30%',
+                height: '2px',
+                background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 50%, transparent 100%)'
+              }} />
               <p style={{
                 fontSize: '12px',
-                color: '#666666',
+                color: '#cccccc',
                 margin: '0 0 8px 0'
               }}>
-                Desenvolvimento de Sistemas - Relatório gerado automaticamente
+                System Tb - Relatório gerado automaticamente
               </p>
               <p style={{
                 fontSize: '10px',
-                color: '#999999',
+                color: '#aaaaaa',
                 margin: '0'
               }}>
                 Este documento contém informações confidenciais da instituição de ensino

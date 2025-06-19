@@ -44,7 +44,7 @@ const Index = () => {
       reports: 'Relatórios do Sistema',
       'visual-reports': 'Relatórios Visuais'
     };
-    return titles[activeTab as keyof typeof titles] || 'Sistema Acadêmico';
+    return titles[activeTab as keyof typeof titles] || 'System Tb';
   };
 
   const getPageDescription = () => {

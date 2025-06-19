@@ -37,7 +37,7 @@ const Navbar = ({ activeTab, onTabChange }: NavbarProps) => {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-white glow-text">
-                  Sistema Acadêmico
+                  System Tb
                 </h1>
                 <p className="text-xs text-white/60">Gestão Inteligente</p>
               </div>
@@ -83,7 +83,7 @@ const Navbar = ({ activeTab, onTabChange }: NavbarProps) => {
               </div>
               <div>
                 <h1 className="text-lg font-bold text-white glow-text">
-                  Sistema Acadêmico
+                  System Tb
                 </h1>
                 <p className="text-xs text-white/60">Gestão Inteligente</p>
               </div>

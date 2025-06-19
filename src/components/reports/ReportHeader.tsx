@@ -37,7 +37,7 @@ const ReportHeader = ({ logoUrl, title }: ReportHeaderProps) => {
           marginBottom: '8px',
           margin: '0 0 8px 0'
         }}>
-          Desenvolvimento de Sistemas
+          System Tb
         </h1>
       )}
       <h2 style={{
