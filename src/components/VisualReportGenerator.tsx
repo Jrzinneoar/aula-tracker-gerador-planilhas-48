@@ -127,17 +127,26 @@ const VisualReportGenerator = () => {
   };
 
   const generateReport = async () => {
-    if (!reportRef.current) return;
+    if (!reportRef.current) {
+      toast({
+        title: "Erro",
+        description: "Elemento do relatório não encontrado",
+        variant: "destructive"
+      });
+      return;
+    }
     
     setIsGenerating(true);
     
     try {
       // Importação dinâmica do html2canvas
-      const html2canvas = await import('html2canvas');
+      const html2canvasModule = await import('html2canvas');
+      const html2canvas = html2canvasModule.default;
       
-      await new Promise(resolve => setTimeout(resolve, 800));
+      // Aguarda um pouco para garantir que o DOM está renderizado
+      await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const canvas = await html2canvas.default(reportRef.current, {
+      const canvas = await html2canvas(reportRef.current, {
         backgroundColor: '#000000',
         scale: 2,
         logging: false,
@@ -151,9 +160,12 @@ const VisualReportGenerator = () => {
         scrollY: 0
       });
 
+      // Criar link para download
       const link = document.createElement('a');
       link.download = `relatorio_${reportType}_${format(new Date(), 'yyyy-MM-dd')}.png`;
       link.href = canvas.toDataURL('image/png', 1.0);
+      
+      // Adicionar ao DOM, clicar e remover
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -166,7 +178,7 @@ const VisualReportGenerator = () => {
       console.error('Erro ao gerar relatório:', error);
       toast({
         title: "Erro",
-        description: "Erro ao gerar relatório visual",
+        description: "Erro ao gerar relatório visual. Tente novamente.",
         variant: "destructive"
       });
     } finally {
@@ -388,16 +400,6 @@ const VisualReportGenerator = () => {
               paddingBottom: '24px',
               position: 'relative'
             }}>
-              <div style={{
-                position: 'absolute',
-                bottom: '-2px',
-                left: '20%',
-                right: '20%',
-                height: '2px',
-                background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.8) 50%, transparent 100%)',
-                transform: 'scaleX(1.2)'
-              }} />
-              
               {logoUrl ? (
                 <div style={{ marginBottom: '20px' }}>
                   <img 
