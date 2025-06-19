@@ -121,28 +121,43 @@ const ReportContent = ({
           marginBottom: '20px',
           borderBottom: '2px solid #e5e7eb',
           paddingBottom: '10px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px'
+          display: 'block',
+          margin: '0 0 20px 0'
         }}>
           Estatísticas Gerais
         </h3>
         <div style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(2, 1fr)',
-          gap: '20px'
+          gap: '24px',
+          marginBottom: '20px'
         }}>
           <div style={{
             padding: '24px',
             borderRadius: '8px',
             textAlign: 'center',
             border: '2px solid #e5e7eb',
-            backgroundColor: '#f9fafb'
+            backgroundColor: '#f9fafb',
+            minHeight: '120px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center'
           }}>
-            <div style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '8px', color: '#2563eb' }}>
+            <div style={{ 
+              fontSize: '36px', 
+              fontWeight: 'bold', 
+              marginBottom: '12px', 
+              color: '#2563eb',
+              lineHeight: '1.2'
+            }}>
               {students.length}
             </div>
-            <div style={{ fontSize: '14px', fontWeight: '600', color: '#374151' }}>
+            <div style={{ 
+              fontSize: '16px', 
+              fontWeight: '600', 
+              color: '#374151',
+              lineHeight: '1.4'
+            }}>
               Total de Alunos
             </div>
           </div>
@@ -151,12 +166,27 @@ const ReportContent = ({
             borderRadius: '8px',
             textAlign: 'center',
             border: '2px solid #e5e7eb',
-            backgroundColor: '#f9fafb'
+            backgroundColor: '#f9fafb',
+            minHeight: '120px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center'
           }}>
-            <div style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '8px', color: '#059669' }}>
+            <div style={{ 
+              fontSize: '36px', 
+              fontWeight: 'bold', 
+              marginBottom: '12px', 
+              color: '#059669',
+              lineHeight: '1.2'
+            }}>
               {limitedClasses.length}
             </div>
-            <div style={{ fontSize: '14px', fontWeight: '600', color: '#374151' }}>
+            <div style={{ 
+              fontSize: '16px', 
+              fontWeight: '600', 
+              color: '#374151',
+              lineHeight: '1.4'
+            }}>
               Aulas no Período
             </div>
           </div>
@@ -165,12 +195,27 @@ const ReportContent = ({
             borderRadius: '8px',
             textAlign: 'center',
             border: '2px solid #e5e7eb',
-            backgroundColor: '#f9fafb'
+            backgroundColor: '#f9fafb',
+            minHeight: '120px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center'
           }}>
-            <div style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '8px', color: '#dc2626' }}>
+            <div style={{ 
+              fontSize: '36px', 
+              fontWeight: 'bold', 
+              marginBottom: '12px', 
+              color: '#dc2626',
+              lineHeight: '1.2'
+            }}>
               {Math.round(attendanceRate)}%
             </div>
-            <div style={{ fontSize: '14px', fontWeight: '600', color: '#374151' }}>
+            <div style={{ 
+              fontSize: '16px', 
+              fontWeight: '600', 
+              color: '#374151',
+              lineHeight: '1.4'
+            }}>
               Taxa de Presença
             </div>
           </div>
@@ -179,12 +224,27 @@ const ReportContent = ({
             borderRadius: '8px',
             textAlign: 'center',
             border: '2px solid #e5e7eb',
-            backgroundColor: '#f9fafb'
+            backgroundColor: '#f9fafb',
+            minHeight: '120px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center'
           }}>
-            <div style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '8px', color: '#7c3aed' }}>
+            <div style={{ 
+              fontSize: '36px', 
+              fontWeight: 'bold', 
+              marginBottom: '12px', 
+              color: '#7c3aed',
+              lineHeight: '1.2'
+            }}>
               {subjectsWithClasses}
             </div>
-            <div style={{ fontSize: '14px', fontWeight: '600', color: '#374151' }}>
+            <div style={{ 
+              fontSize: '16px', 
+              fontWeight: '600', 
+              color: '#374151',
+              lineHeight: '1.4'
+            }}>
               Matérias Ativas
             </div>
           </div>
@@ -200,62 +260,128 @@ const ReportContent = ({
             color: '#1f2937',
             marginBottom: '20px',
             borderBottom: '1px solid #e5e7eb',
-            paddingBottom: '8px'
+            paddingBottom: '8px',
+            margin: '0 0 20px 0'
           }}>
             Análise Detalhada
           </h3>
           <div style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '16px'
+            gap: '20px',
+            marginBottom: '20px'
           }}>
             <div style={{
-              padding: '16px',
+              padding: '20px',
               border: '1px solid #e5e7eb',
               backgroundColor: '#f3f4f6',
               borderRadius: '6px',
-              textAlign: 'center'
+              textAlign: 'center',
+              minHeight: '100px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center'
             }}>
-              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#dc2626', marginBottom: '4px' }}>
+              <div style={{ 
+                fontSize: '24px', 
+                fontWeight: 'bold', 
+                color: '#dc2626', 
+                marginBottom: '8px',
+                lineHeight: '1.2'
+              }}>
                 {limitedAbsences.length}
               </div>
-              <div style={{ fontSize: '12px', color: '#374151' }}>Total de Faltas</div>
+              <div style={{ 
+                fontSize: '14px', 
+                color: '#374151',
+                lineHeight: '1.4'
+              }}>
+                Total de Faltas
+              </div>
             </div>
             <div style={{
-              padding: '16px',
+              padding: '20px',
               border: '1px solid #e5e7eb',
               backgroundColor: '#f3f4f6',
               borderRadius: '6px',
-              textAlign: 'center'
+              textAlign: 'center',
+              minHeight: '100px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center'
             }}>
-              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#059669', marginBottom: '4px' }}>
+              <div style={{ 
+                fontSize: '24px', 
+                fontWeight: 'bold', 
+                color: '#059669', 
+                marginBottom: '8px',
+                lineHeight: '1.2'
+              }}>
                 {totalAttendances}
               </div>
-              <div style={{ fontSize: '12px', color: '#374151' }}>Total Presenças</div>
+              <div style={{ 
+                fontSize: '14px', 
+                color: '#374151',
+                lineHeight: '1.4'
+              }}>
+                Total Presenças
+              </div>
             </div>
             <div style={{
-              padding: '16px',
+              padding: '20px',
               border: '1px solid #e5e7eb',
               backgroundColor: '#f3f4f6',
               borderRadius: '6px',
-              textAlign: 'center'
+              textAlign: 'center',
+              minHeight: '100px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center'
             }}>
-              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#2563eb', marginBottom: '4px' }}>
+              <div style={{ 
+                fontSize: '24px', 
+                fontWeight: 'bold', 
+                color: '#2563eb', 
+                marginBottom: '8px',
+                lineHeight: '1.2'
+              }}>
                 {studentsWithPerfectAttendance}
               </div>
-              <div style={{ fontSize: '12px', color: '#374151' }}>Presença Perfeita</div>
+              <div style={{ 
+                fontSize: '14px', 
+                color: '#374151',
+                lineHeight: '1.4'
+              }}>
+                Presença Perfeita
+              </div>
             </div>
             <div style={{
-              padding: '16px',
+              padding: '20px',
               border: '1px solid #e5e7eb',
               backgroundColor: '#f3f4f6',
               borderRadius: '6px',
-              textAlign: 'center'
+              textAlign: 'center',
+              minHeight: '100px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center'
             }}>
-              <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#7c3aed', marginBottom: '4px' }}>
+              <div style={{ 
+                fontSize: '24px', 
+                fontWeight: 'bold', 
+                color: '#7c3aed', 
+                marginBottom: '8px',
+                lineHeight: '1.2'
+              }}>
                 {Math.round(averageAbsencesPerStudent * 10) / 10}
               </div>
-              <div style={{ fontSize: '12px', color: '#374151' }}>Média Faltas/Aluno</div>
+              <div style={{ 
+                fontSize: '14px', 
+                color: '#374151',
+                lineHeight: '1.4'
+              }}>
+                Média Faltas/Aluno
+              </div>
             </div>
           </div>
         </div>
@@ -270,34 +396,38 @@ const ReportContent = ({
             color: '#1f2937',
             marginBottom: '20px',
             borderBottom: '1px solid #e5e7eb',
-            paddingBottom: '8px'
+            paddingBottom: '8px',
+            margin: '0 0 20px 0'
           }}>
             Aulas Realizadas
           </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {limitedClasses.map((session: any) => (
               <div key={session.id} style={{
                 backgroundColor: '#f9fafb',
-                padding: '16px',
+                padding: '20px',
                 border: '1px solid #e5e7eb',
                 borderRadius: '8px',
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'flex-start'
+                alignItems: 'flex-start',
+                minHeight: '80px'
               }}>
-                <div style={{ flex: 1, paddingRight: '16px' }}>
+                <div style={{ flex: 1, paddingRight: '20px' }}>
                   <div style={{
                     fontWeight: 'bold',
                     color: '#1f2937',
                     fontSize: '16px',
-                    marginBottom: '6px'
+                    marginBottom: '8px',
+                    lineHeight: '1.4'
                   }}>
                     {session.subject?.name}
                   </div>
                   <div style={{
                     fontSize: '14px',
                     color: '#6b7280',
-                    marginBottom: '4px'
+                    marginBottom: '6px',
+                    lineHeight: '1.4'
                   }}>
                     {session.topic}
                   </div>
@@ -305,7 +435,8 @@ const ReportContent = ({
                     <div style={{
                       fontSize: '12px',
                       color: '#9ca3af',
-                      fontStyle: 'italic'
+                      fontStyle: 'italic',
+                      lineHeight: '1.4'
                     }}>
                       {session.notes}
                     </div>
@@ -316,17 +447,19 @@ const ReportContent = ({
                     fontSize: '14px',
                     fontWeight: 'bold',
                     color: '#1f2937',
-                    marginBottom: '4px'
+                    marginBottom: '8px',
+                    lineHeight: '1.4'
                   }}>
                     {format(new Date(session.date + 'T12:00:00'), 'dd/MM/yyyy')}
                   </div>
                   <div style={{
                     fontSize: '12px',
-                    padding: '4px 8px',
+                    padding: '6px 12px',
                     border: '1px solid #d1d5db',
                     borderRadius: '12px',
                     backgroundColor: '#ffffff',
-                    color: '#374151'
+                    color: '#374151',
+                    whiteSpace: 'nowrap'
                   }}>
                     {session.attendance_records?.length || 0} presentes
                   </div>
@@ -346,34 +479,38 @@ const ReportContent = ({
             color: '#1f2937',
             marginBottom: '20px',
             borderBottom: '1px solid #e5e7eb',
-            paddingBottom: '8px'
+            paddingBottom: '8px',
+            margin: '0 0 20px 0'
           }}>
             Faltas Registradas
           </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {limitedAbsences.map((absence: any) => (
               <div key={absence.id} style={{
                 backgroundColor: '#f9fafb',
-                padding: '16px',
+                padding: '20px',
                 border: '1px solid #e5e7eb',
                 borderRadius: '8px',
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'flex-start'
+                alignItems: 'flex-start',
+                minHeight: '80px'
               }}>
-                <div style={{ flex: 1, paddingRight: '16px' }}>
+                <div style={{ flex: 1, paddingRight: '20px' }}>
                   <div style={{
                     fontWeight: 'bold',
                     color: '#1f2937',
                     fontSize: '16px',
-                    marginBottom: '6px'
+                    marginBottom: '8px',
+                    lineHeight: '1.4'
                   }}>
                     {absence.student?.name}
                   </div>
                   {absence.reason && (
                     <div style={{
                       fontSize: '14px',
-                      color: '#6b7280'
+                      color: '#6b7280',
+                      lineHeight: '1.4'
                     }}>
                       {absence.reason}
                     </div>
@@ -384,17 +521,19 @@ const ReportContent = ({
                     fontSize: '14px',
                     fontWeight: 'bold',
                     color: '#1f2937',
-                    marginBottom: '4px'
+                    marginBottom: '8px',
+                    lineHeight: '1.4'
                   }}>
                     {format(new Date(absence.absence_date + 'T12:00:00'), 'dd/MM/yyyy')}
                   </div>
                   <div style={{
                     fontSize: '12px',
-                    padding: '4px 8px',
+                    padding: '6px 12px',
                     border: '1px solid #d1d5db',
                     borderRadius: '12px',
                     backgroundColor: absence.justified ? '#dcfce7' : '#fee2e2',
-                    color: absence.justified ? '#166534' : '#991b1b'
+                    color: absence.justified ? '#166534' : '#991b1b',
+                    whiteSpace: 'nowrap'
                   }}>
                     {absence.justified ? 'Justificada' : 'Não Justificada'}
                   </div>
@@ -415,14 +554,16 @@ const ReportContent = ({
         <p style={{
           fontSize: '12px',
           color: '#6b7280',
-          margin: '0 0 8px 0'
+          margin: '0 0 8px 0',
+          lineHeight: '1.4'
         }}>
           System - Relatório gerado automaticamente
         </p>
         <p style={{
           fontSize: '10px',
           color: '#9ca3af',
-          margin: '0'
+          margin: '0',
+          lineHeight: '1.4'
         }}>
           Este documento contém informações confidenciais da instituição de ensino
         </p>
