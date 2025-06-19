@@ -5,23 +5,25 @@ const ReportFooter = () => {
   return (
     <div style={{
       marginTop: '30px',
-      paddingTop: '20px',
-      borderTop: '1px solid #d1d5db',
-      textAlign: 'center'
+      paddingTop: '15px',
+      borderTop: '2px solid #e5e7eb',
+      textAlign: 'center',
+      width: '100%'
     }}>
       <p style={{
-        fontSize: '10px',
+        fontSize: '11px',
         color: '#6b7280',
-        margin: '0 0 4px 0'
+        margin: '0 0 5px 0',
+        fontWeight: '600'
       }}>
-        System - Relatório gerado automaticamente
+        Sistema de Frequência - Relatório Oficial
       </p>
       <p style={{
         fontSize: '10px',
         color: '#9ca3af',
         margin: '0'
       }}>
-        Este documento contém informações confidenciais da instituição de ensino
+        Documento confidencial da instituição de ensino
       </p>
     </div>
   );
