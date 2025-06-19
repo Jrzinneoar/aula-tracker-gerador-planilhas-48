@@ -31,15 +31,9 @@ const Navbar = ({ activeTab, onTabChange }: NavbarProps) => {
       <nav className="glass-nav fixed top-0 left-0 right-0 z-50 hidden md:block">
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
-                <BarChart3 className="w-5 h-5 text-black" />
-              </div>
-              <div>
-                <h1 className="text-xl font-bold text-white glow-text">
-                  System Tb
-                </h1>
-                <p className="text-xs text-white/60">Gestão Inteligente</p>
+            <div className="flex items-center justify-center">
+              <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center">
+                <BarChart3 className="w-6 h-6 text-black" />
               </div>
             </div>
             
@@ -77,15 +71,9 @@ const Navbar = ({ activeTab, onTabChange }: NavbarProps) => {
       <nav className="glass-nav fixed top-0 left-0 right-0 z-50 md:hidden">
         <div className="px-4 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center justify-center">
               <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
                 <BarChart3 className="w-5 h-5 text-black" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold text-white glow-text">
-                  System Tb
-                </h1>
-                <p className="text-xs text-white/60">Gestão Inteligente</p>
               </div>
             </div>
             
