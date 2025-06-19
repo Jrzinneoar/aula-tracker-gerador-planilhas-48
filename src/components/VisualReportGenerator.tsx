@@ -1,4 +1,3 @@
-
 import React, { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -6,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Student, Subject, Absence } from '@/types';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { FileImage, Download, Upload, X, Settings, AlertCircle, TrendingUp, Users, BookOpen, Calendar } from 'lucide-react';
+import { FileImage, Download, Upload, X, Settings, AlertCircle, TrendingUp, Users, BookOpen, Calendar, Clock, Award, UserCheck, UserX, BarChart3, PieChart, Activity } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -194,6 +193,39 @@ const VisualReportGenerator = () => {
   const subjectsWithClasses = [...new Set(filteredClasses.map((cls: any) => cls.subject?.name))].length;
   const studentsWithAbsences = [...new Set(filteredAbsences.map((abs: any) => abs.student_id))].length;
   const averageAbsencesPerStudent = students.length > 0 ? (filteredAbsences.length / students.length) : 0;
+
+  // Estatísticas adicionais para relatórios semanal e mensal
+  const justifiedAbsences = filteredAbsences.filter((abs: any) => abs.justified).length;
+  const unjustifiedAbsences = filteredAbsences.length - justifiedAbsences;
+  const totalAttendances = filteredClasses.reduce((sum: number, cls: any) => sum + (cls.attendance_records?.length || 0), 0);
+  const studentsWithPerfectAttendance = students.filter(student => 
+    !filteredAbsences.some((abs: any) => abs.student_id === student.id)
+  ).length;
+
+  // Estatísticas por matéria
+  const subjectStats = subjects.map(subject => {
+    const subjectClasses = filteredClasses.filter((cls: any) => cls.subject_id === subject.id);
+    const subjectAbsences = filteredAbsences.filter((abs: any) => abs.subject_id === subject.id);
+    const subjectAttendances = subjectClasses.reduce((sum: number, cls: any) => sum + (cls.attendance_records?.length || 0), 0);
+    
+    return {
+      name: subject.name,
+      classes: subjectClasses.length,
+      absences: subjectAbsences.length,
+      attendances: subjectAttendances,
+      attendanceRate: subjectClasses.length > 0 ? ((subjectAttendances / (subjectClasses.length * students.length)) * 100) : 0
+    };
+  }).filter(stat => stat.classes > 0);
+
+  // Top estudantes com mais faltas
+  const studentAbsenceStats = students.map(student => {
+    const studentAbsences = filteredAbsences.filter((abs: any) => abs.student_id === student.id);
+    return {
+      name: student.name,
+      absences: studentAbsences.length,
+      justified: studentAbsences.filter((abs: any) => abs.justified).length
+    };
+  }).sort((a, b) => b.absences - a.absences).slice(0, 5);
 
   const limitedAbsences = filteredAbsences.slice(0, 12);
   const limitedClasses = filteredClasses.slice(0, 10);
@@ -395,7 +427,7 @@ const VisualReportGenerator = () => {
                   margin: '0 0 12px 0',
                   textShadow: '2px 2px 4px rgba(255, 255, 255, 0.1)'
                 }}>
-                  System Tb
+                  System
                 </h1>
               )}
               <h2 style={{
@@ -431,7 +463,7 @@ const VisualReportGenerator = () => {
                 gap: '12px',
                 position: 'relative'
               }}>
-                <TrendingUp style={{ width: '20px', height: '20px' }} />
+                <BarChart3 style={{ width: '20px', height: '20px' }} />
                 Estatísticas Gerais
                 <div style={{
                   position: 'absolute',
@@ -516,6 +548,7 @@ const VisualReportGenerator = () => {
                     height: '1px',
                     background: 'linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.6) 50%, transparent 100%)'
                   }} />
+                  <Activity style={{ width: '24px', height: '24px', margin: '0 auto 8px', color: '#ffffff' }} />
                   <div style={{ fontSize: '36px', fontWeight: 'bold', marginBottom: '8px', color: '#ffffff' }}>
                     {Math.round(attendanceRate)}%
                   </div>
@@ -552,69 +585,274 @@ const VisualReportGenerator = () => {
               </div>
             </div>
 
-            {/* Estatísticas Detalhadas */}
-            <div style={{ marginBottom: '40px' }}>
-              <h3 style={{
-                fontSize: '18px',
-                fontWeight: 'bold',
-                color: '#ffffff',
-                marginBottom: '20px',
-                borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-                paddingBottom: '8px'
-              }}>
-                Análise Detalhada
-              </h3>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: '16px'
-              }}>
-                <div style={{
-                  padding: '16px',
-                  borderRadius: '8px',
-                  textAlign: 'center',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  backgroundColor: 'rgba(255, 255, 255, 0.03)'
+            {/* Estatísticas Detalhadas (mais informações para semanal e mensal) */}
+            {(reportType === 'weekly' || reportType === 'monthly') && (
+              <div style={{ marginBottom: '40px' }}>
+                <h3 style={{
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  color: '#ffffff',
+                  marginBottom: '20px',
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                  paddingBottom: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
                 }}>
-                  <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px', color: '#ffffff' }}>
-                    {limitedAbsences.length}
+                  <PieChart style={{ width: '18px', height: '18px' }} />
+                  Análise Detalhada
+                </h3>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
+                  gap: '16px'
+                }}>
+                  <div style={{
+                    padding: '16px',
+                    borderRadius: '8px',
+                    textAlign: 'center',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)'
+                  }}>
+                    <UserX style={{ width: '20px', height: '20px', margin: '0 auto 4px', color: '#ffffff' }} />
+                    <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px', color: '#ffffff' }}>
+                      {limitedAbsences.length}
+                    </div>
+                    <div style={{ fontSize: '12px', fontWeight: '600', color: '#cccccc' }}>
+                      Total de Faltas
+                    </div>
                   </div>
-                  <div style={{ fontSize: '12px', fontWeight: '600', color: '#cccccc' }}>
-                    Total de Faltas
+                  
+                  <div style={{
+                    padding: '16px',
+                    borderRadius: '8px',
+                    textAlign: 'center',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)'
+                  }}>
+                    <UserCheck style={{ width: '20px', height: '20px', margin: '0 auto 4px', color: '#ffffff' }} />
+                    <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px', color: '#ffffff' }}>
+                      {totalAttendances}
+                    </div>
+                    <div style={{ fontSize: '12px', fontWeight: '600', color: '#cccccc' }}>
+                      Total Presenças
+                    </div>
+                  </div>
+                  
+                  <div style={{
+                    padding: '16px',
+                    borderRadius: '8px',
+                    textAlign: 'center',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)'
+                  }}>
+                    <Award style={{ width: '20px', height: '20px', margin: '0 auto 4px', color: '#ffffff' }} />
+                    <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px', color: '#ffffff' }}>
+                      {studentsWithPerfectAttendance}
+                    </div>
+                    <div style={{ fontSize: '12px', fontWeight: '600', color: '#cccccc' }}>
+                      Presença Perfeita
+                    </div>
+                  </div>
+                  
+                  <div style={{
+                    padding: '16px',
+                    borderRadius: '8px',
+                    textAlign: 'center',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)'
+                  }}>
+                    <Clock style={{ width: '20px', height: '20px', margin: '0 auto 4px', color: '#ffffff' }} />
+                    <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px', color: '#ffffff' }}>
+                      {Math.round(averageAbsencesPerStudent * 10) / 10}
+                    </div>
+                    <div style={{ fontSize: '12px', fontWeight: '600', color: '#cccccc' }}>
+                      Média Faltas/Aluno
+                    </div>
                   </div>
                 </div>
-                
+
+                {/* Estatísticas Justificadas vs Não Justificadas */}
                 <div style={{
-                  padding: '16px',
-                  borderRadius: '8px',
-                  textAlign: 'center',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  backgroundColor: 'rgba(255, 255, 255, 0.03)'
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gap: '16px',
+                  marginTop: '20px'
                 }}>
-                  <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px', color: '#ffffff' }}>
-                    {studentsWithAbsences}
+                  <div style={{
+                    padding: '16px',
+                    borderRadius: '8px',
+                    textAlign: 'center',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)'
+                  }}>
+                    <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px', color: '#ffffff' }}>
+                      {justifiedAbsences}
+                    </div>
+                    <div style={{ fontSize: '12px', fontWeight: '600', color: '#cccccc' }}>
+                      Faltas Justificadas
+                    </div>
                   </div>
-                  <div style={{ fontSize: '12px', fontWeight: '600', color: '#cccccc' }}>
-                    Alunos com Faltas
-                  </div>
-                </div>
-                
-                <div style={{
-                  padding: '16px',
-                  borderRadius: '8px',
-                  textAlign: 'center',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
-                  backgroundColor: 'rgba(255, 255, 255, 0.03)'
-                }}>
-                  <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px', color: '#ffffff' }}>
-                    {Math.round(averageAbsencesPerStudent * 10) / 10}
-                  </div>
-                  <div style={{ fontSize: '12px', fontWeight: '600', color: '#cccccc' }}>
-                    Média Faltas/Aluno
+                  
+                  <div style={{
+                    padding: '16px',
+                    borderRadius: '8px',
+                    textAlign: 'center',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    backgroundColor: 'rgba(255, 255, 255, 0.03)'
+                  }}>
+                    <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px', color: '#ffffff' }}>
+                      {unjustifiedAbsences}
+                    </div>
+                    <div style={{ fontSize: '12px', fontWeight: '600', color: '#cccccc' }}>
+                      Faltas Não Justificadas
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
+
+            {/* Estatísticas por Matéria (apenas para semanal e mensal) */}
+            {(reportType === 'weekly' || reportType === 'monthly') && subjectStats.length > 0 && (
+              <div style={{ marginBottom: '40px' }}>
+                <h3 style={{
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  color: '#ffffff',
+                  marginBottom: '20px',
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                  paddingBottom: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <BookOpen style={{ width: '18px', height: '18px' }} />
+                  Desempenho por Matéria
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {subjectStats.slice(0, 6).map((stat, index) => (
+                    <div key={index} style={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      padding: '16px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      borderRadius: '8px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{
+                          fontWeight: 'bold',
+                          color: '#ffffff',
+                          fontSize: '16px',
+                          marginBottom: '4px',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {stat.name}
+                        </div>
+                        <div style={{
+                          fontSize: '12px',
+                          color: '#cccccc'
+                        }}>
+                          {stat.classes} aulas • {stat.absences} faltas
+                        </div>
+                      </div>
+                      <div style={{
+                        textAlign: 'right',
+                        flexShrink: 0,
+                        marginLeft: '16px'
+                      }}>
+                        <div style={{
+                          fontSize: '14px',
+                          fontWeight: 'bold',
+                          color: '#ffffff',
+                          marginBottom: '4px'
+                        }}>
+                          {Math.round(stat.attendanceRate)}%
+                        </div>
+                        <div style={{
+                          fontSize: '10px',
+                          color: '#cccccc'
+                        }}>
+                          presença
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Top Alunos com Mais Faltas (apenas para semanal e mensal) */}
+            {(reportType === 'weekly' || reportType === 'monthly') && studentAbsenceStats.filter(s => s.absences > 0).length > 0 && (
+              <div style={{ marginBottom: '40px' }}>
+                <h3 style={{
+                  fontSize: '18px',
+                  fontWeight: 'bold',
+                  color: '#ffffff',
+                  marginBottom: '20px',
+                  borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
+                  paddingBottom: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <TrendingUp style={{ width: '18px', height: '18px' }} />
+                  Alunos com Mais Faltas
+                </h3>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {studentAbsenceStats.filter(s => s.absences > 0).slice(0, 5).map((student, index) => (
+                    <div key={index} style={{
+                      backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                      padding: '12px',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      borderRadius: '8px',
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1, minWidth: 0 }}>
+                        <div style={{
+                          width: '20px',
+                          height: '20px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: 'white',
+                          fontWeight: 'bold',
+                          fontSize: '10px',
+                          flexShrink: 0
+                        }}>
+                          {index + 1}
+                        </div>
+                        <div style={{
+                          fontWeight: 'bold',
+                          color: '#ffffff',
+                          fontSize: '14px',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap'
+                        }}>
+                          {student.name}
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        <div style={{ fontWeight: 'bold', color: '#ffffff', fontSize: '14px' }}>
+                          {student.absences} faltas
+                        </div>
+                        <div style={{ fontSize: '10px', color: '#cccccc' }}>
+                          {student.justified} justificadas
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Aulas */}
             {limitedClasses.length > 0 && (
@@ -625,8 +863,12 @@ const VisualReportGenerator = () => {
                   color: '#ffffff',
                   marginBottom: '20px',
                   borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-                  paddingBottom: '8px'
+                  paddingBottom: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
                 }}>
+                  <Calendar style={{ width: '18px', height: '18px' }} />
                   Aulas Realizadas
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -716,8 +958,12 @@ const VisualReportGenerator = () => {
                   color: '#ffffff',
                   marginBottom: '20px',
                   borderBottom: '1px solid rgba(255, 255, 255, 0.2)',
-                  paddingBottom: '8px'
+                  paddingBottom: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
                 }}>
+                  <UserX style={{ width: '18px', height: '18px' }} />
                   Faltas Registradas
                 </h3>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -811,7 +1057,7 @@ const VisualReportGenerator = () => {
                 color: '#cccccc',
                 margin: '0 0 8px 0'
               }}>
-                System Tb - Relatório gerado automaticamente
+                System - Relatório gerado automaticamente
               </p>
               <p style={{
                 fontSize: '10px',
