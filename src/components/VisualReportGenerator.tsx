@@ -142,25 +142,45 @@ const VisualReportGenerator = () => {
       const html2canvasModule = await import('html2canvas');
       const html2canvas = html2canvasModule.default;
       
-      // Aguarda renderização
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Aguarda renderização completa
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Força o scroll para o topo do elemento
+      reportRef.current.scrollTop = 0;
       
       const canvas = await html2canvas(reportRef.current, {
-        backgroundColor: '#1a1a1a',
-        scale: 1.5,
-        logging: false,
+        backgroundColor: '#ffffff', // Fundo branco ao invés de transparente
+        scale: 2, // Aumenta a qualidade
+        logging: true, // Habilita logs para debug
         useCORS: true,
-        allowTaint: false,
+        allowTaint: true, // Permite imagens externas
         width: reportRef.current.scrollWidth,
         height: reportRef.current.scrollHeight,
         scrollX: 0,
         scrollY: 0,
-        foreignObjectRendering: true
+        foreignObjectRendering: false, // Desabilita para melhor compatibilidade
+        removeContainer: true,
+        imageTimeout: 15000,
+        onclone: (clonedDoc) => {
+          // Força estilos no documento clonado
+          const clonedElement = clonedDoc.querySelector('[data-report-content]');
+          if (clonedElement) {
+            clonedElement.style.backgroundColor = '#ffffff';
+            clonedElement.style.color = '#000000';
+            clonedElement.style.visibility = 'visible';
+            clonedElement.style.opacity = '1';
+          }
+        }
       });
+
+      // Verifica se o canvas foi gerado corretamente
+      if (canvas.width === 0 || canvas.height === 0) {
+        throw new Error('Canvas gerado com dimensões inválidas');
+      }
 
       const link = document.createElement('a');
       link.download = `relatorio_${reportType}_${format(new Date(), 'yyyy-MM-dd_HH-mm')}.png`;
-      link.href = canvas.toDataURL('image/png', 0.95);
+      link.href = canvas.toDataURL('image/png', 1.0); // Máxima qualidade
       
       document.body.appendChild(link);
       link.click();
@@ -262,7 +282,7 @@ const VisualReportGenerator = () => {
           <CardTitle className="text-black">Preview do Relatório</CardTitle>
         </CardHeader>
         <CardContent className="p-6">
-          <div ref={reportRef}>
+          <div ref={reportRef} data-report-content style={{ backgroundColor: '#ffffff' }}>
             <ReportContent
               logoUrl={logoUrl}
               title={getReportTitle()}
