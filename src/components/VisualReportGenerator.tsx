@@ -141,46 +141,60 @@ const VisualReportGenerator = () => {
       const html2canvasModule = await import('html2canvas');
       const html2canvas = html2canvasModule.default;
       
-      // Aguarda renderização completa
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Aguarda um pouco para garantir que tudo foi renderizado
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Força o scroll para o topo do elemento
-      reportRef.current.scrollTop = 0;
-      
+      // Configurações otimizadas para melhor captura
       const canvas = await html2canvas(reportRef.current, {
         backgroundColor: '#ffffff',
         scale: 2,
         logging: false,
         useCORS: true,
-        allowTaint: true,
-        width: reportRef.current.scrollWidth,
+        allowTaint: false,
+        width: 800,
         height: reportRef.current.scrollHeight,
         scrollX: 0,
         scrollY: 0,
+        windowWidth: 800,
+        windowHeight: reportRef.current.scrollHeight,
         foreignObjectRendering: false,
-        removeContainer: true,
-        imageTimeout: 15000,
-        onclone: (clonedDoc) => {
-          // Força estilos no documento clonado com tipagem correta
-          const clonedElement = clonedDoc.querySelector('[data-report-content]') as HTMLElement;
-          if (clonedElement) {
-            clonedElement.style.backgroundColor = '#ffffff';
-            clonedElement.style.color = '#000000';
-            clonedElement.style.visibility = 'visible';
-            clonedElement.style.opacity = '1';
-          }
+        imageTimeout: 30000,
+        removeContainer: false,
+        onclone: (clonedDoc, element) => {
+          // Aplica estilos específicos no clone para garantir renderização correta
+          const clonedElement = element as HTMLElement;
+          clonedElement.style.width = '800px';
+          clonedElement.style.maxWidth = '800px';
+          clonedElement.style.minWidth = '800px';
+          clonedElement.style.fontSize = '12px';
+          clonedElement.style.lineHeight = '1.4';
+          clonedElement.style.backgroundColor = '#ffffff';
+          clonedElement.style.color = '#000000';
+          clonedElement.style.padding = '30px';
+          clonedElement.style.boxSizing = 'border-box';
+          clonedElement.style.overflow = 'visible';
+          
+          // Força a visibilidade de todos os elementos
+          const allElements = clonedElement.querySelectorAll('*');
+          allElements.forEach((el: any) => {
+            el.style.visibility = 'visible';
+            el.style.opacity = '1';
+            el.style.display = el.style.display === 'none' ? 'block' : el.style.display;
+          });
         }
       });
 
       // Verifica se o canvas foi gerado corretamente
       if (canvas.width === 0 || canvas.height === 0) {
-        throw new Error('Canvas gerado com dimensões inválidas');
+        throw new Error('Canvas com dimensões inválidas');
       }
 
+      // Cria o link de download
       const link = document.createElement('a');
-      link.download = `relatorio_${reportType}_${format(new Date(), 'yyyy-MM-dd_HH-mm')}.png`;
+      link.download = `relatorio_${reportType}_${format(new Date(), 'yyyy-MM-dd_HH-mm-ss')}.png`;
       link.href = canvas.toDataURL('image/png', 1.0);
       
+      // Força o download
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -216,7 +230,7 @@ const VisualReportGenerator = () => {
     }
   };
 
-  // Estatísticas calculadas - CORRIGIDO
+  // Estatísticas calculadas
   const totalAttendances = filteredClasses.reduce((sum: number, cls: any) => sum + (cls.attendance_records?.length || 0), 0);
   const totalPossibleAttendances = filteredClasses.length * students.length;
   const attendanceRate = totalPossibleAttendances > 0 ? ((totalAttendances / totalPossibleAttendances) * 100) : 0;
@@ -234,7 +248,7 @@ const VisualReportGenerator = () => {
     !filteredAbsences.some((abs: any) => abs.student_id === student.id)
   ).length;
 
-  // Estatísticas por matéria - CORRIGIDO
+  // Estatísticas por matéria
   const subjectStats = subjects.map(subject => {
     const subjectClasses = filteredClasses.filter((cls: any) => cls.subject_id === subject.id);
     const subjectAbsences = filteredAbsences.filter((abs: any) => abs.subject_id === subject.id);
@@ -285,14 +299,18 @@ const VisualReportGenerator = () => {
         <CardHeader className="bg-gray-50 border-b border-gray-200">
           <CardTitle className="text-black">Preview do Relatório</CardTitle>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent className="p-0">
           <div 
             ref={reportRef} 
             data-report-content 
             style={{ 
               backgroundColor: '#ffffff',
               color: '#000000',
-              minHeight: '800px'
+              width: '800px',
+              maxWidth: '800px',
+              minWidth: '800px',
+              margin: '0 auto',
+              overflow: 'visible'
             }}
           >
             <ReportContent
