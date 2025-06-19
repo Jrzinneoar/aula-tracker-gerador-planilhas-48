@@ -9,7 +9,6 @@ import { FileImage, Download, Upload, X, Settings, AlertCircle, TrendingUp, User
 import { useQuery } from '@tanstack/react-query';
 import { format, startOfWeek, endOfWeek, startOfMonth, endOfMonth, isWithinInterval } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import html2canvas from 'html2canvas';
 
 const VisualReportGenerator = () => {
   const [reportType, setReportType] = useState<'daily' | 'weekly' | 'monthly'>('daily');
@@ -133,9 +132,12 @@ const VisualReportGenerator = () => {
     setIsGenerating(true);
     
     try {
+      // Importação dinâmica do html2canvas
+      const html2canvas = await import('html2canvas');
+      
       await new Promise(resolve => setTimeout(resolve, 800));
       
-      const canvas = await html2canvas(reportRef.current, {
+      const canvas = await html2canvas.default(reportRef.current, {
         backgroundColor: '#000000',
         scale: 2,
         logging: false,
@@ -152,7 +154,9 @@ const VisualReportGenerator = () => {
       const link = document.createElement('a');
       link.download = `relatorio_${reportType}_${format(new Date(), 'yyyy-MM-dd')}.png`;
       link.href = canvas.toDataURL('image/png', 1.0);
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
 
       toast({
         title: "Sucesso",
@@ -308,15 +312,6 @@ const VisualReportGenerator = () => {
               )}
             </div>
           </div>
-
-          {hasLimitedData && (
-            <div className="flex items-center gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-              <AlertCircle className="w-4 h-4 text-yellow-600" />
-              <p className="text-sm text-yellow-800">
-                Dados limitados para melhor qualidade da imagem: {limitedClasses.length} aulas e {limitedAbsences.length} faltas mostradas
-              </p>
-            </div>
-          )}
 
           <Button 
             onClick={generateReport} 
@@ -934,11 +929,12 @@ const VisualReportGenerator = () => {
                         </div>
                         <div style={{
                           fontSize: '12px',
-                          color: '#ffffff',
-                          backgroundColor: 'rgba(255, 255, 255, 0.1)',
                           padding: '4px 8px',
+                          border: '1px solid',
                           borderRadius: '12px',
-                          border: '1px solid rgba(255, 255, 255, 0.2)'
+                          backgroundColor: session.attendance_records?.length || 0 ? 'rgba(255, 255, 255, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                          color: session.attendance_records?.length || 0 ? '#ffffff' : '#cccccc',
+                          borderColor: session.attendance_records?.length || 0 ? 'rgba(255, 255, 255, 0.3)' : 'rgba(255, 255, 255, 0.2)'
                         }}>
                           {session.attendance_records?.length || 0} presentes
                         </div>
