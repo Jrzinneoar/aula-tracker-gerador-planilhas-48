@@ -1,3 +1,4 @@
+
 import React, { useRef, useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Student, Subject, Absence } from '@/types';
@@ -141,10 +142,10 @@ const VisualReportGenerator = () => {
       const html2canvasModule = await import('html2canvas');
       const html2canvas = html2canvasModule.default;
       
-      // Aguarda renderização completa
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Aguarda a renderização completa do DOM
+      await new Promise(resolve => setTimeout(resolve, 2000));
       
-      // Configurações otimizadas para captura perfeita
+      // Configurações para captura perfeita
       const canvas = await html2canvas(reportRef.current, {
         backgroundColor: '#ffffff',
         scale: 2,
@@ -155,64 +156,99 @@ const VisualReportGenerator = () => {
         height: reportRef.current.scrollHeight,
         scrollX: 0,
         scrollY: 0,
-        windowWidth: 800,
-        windowHeight: reportRef.current.scrollHeight,
-        foreignObjectRendering: true,
-        imageTimeout: 15000,
+        windowWidth: 1200,
+        windowHeight: reportRef.current.scrollHeight + 100,
+        foreignObjectRendering: false,
+        imageTimeout: 30000,
         removeContainer: false,
         onclone: (clonedDoc, element) => {
-          const clonedElement = element as HTMLElement;
-          // Força dimensões exatas
-          clonedElement.style.width = '800px';
-          clonedElement.style.maxWidth = '800px';
-          clonedElement.style.minWidth = '800px';
-          clonedElement.style.padding = '30px';
-          clonedElement.style.margin = '0 auto';
-          clonedElement.style.boxSizing = 'border-box';
-          clonedElement.style.backgroundColor = '#ffffff';
-          clonedElement.style.color = '#000000';
-          clonedElement.style.fontSize = '13px';
-          clonedElement.style.lineHeight = '1.4';
-          clonedElement.style.fontFamily = 'Arial, sans-serif';
-          clonedElement.style.overflow = 'visible';
-          clonedElement.style.position = 'relative';
+          // Força estilos no elemento clonado
+          element.style.width = '800px';
+          element.style.maxWidth = '800px';
+          element.style.minWidth = '800px';
+          element.style.padding = '40px';
+          element.style.margin = '0';
+          element.style.boxSizing = 'border-box';
+          element.style.backgroundColor = '#ffffff';
+          element.style.color = '#000000';
+          element.style.fontSize = '14px';
+          element.style.lineHeight = '1.5';
+          element.style.fontFamily = 'Arial, sans-serif';
+          element.style.overflow = 'visible';
+          element.style.position = 'relative';
+          element.style.display = 'block';
+          element.style.visibility = 'visible';
+          element.style.opacity = '1';
           
-          // Garante visibilidade de todos os elementos
-          const allElements = clonedElement.querySelectorAll('*');
+          // Garante que todos os elementos filhos sejam visíveis
+          const allElements = element.querySelectorAll('*');
           allElements.forEach((el: any) => {
             el.style.visibility = 'visible';
             el.style.opacity = '1';
-            el.style.display = el.style.display === 'none' ? 'block' : el.style.display;
+            el.style.display = el.style.display === 'none' ? 'block' : (el.style.display || 'block');
             el.style.overflow = 'visible';
             el.style.boxSizing = 'border-box';
+            el.style.color = '#000000';
+            el.style.backgroundColor = el.style.backgroundColor || 'transparent';
+            
+            // Remove qualquer transform que possa interferir
+            el.style.transform = 'none';
+            el.style.webkitTransform = 'none';
           });
+          
+          // Remove estilos que podem interferir na captura
+          const styleSheets = clonedDoc.styleSheets;
+          for (let i = 0; i < styleSheets.length; i++) {
+            try {
+              const sheet = styleSheets[i] as CSSStyleSheet;
+              if (sheet.href && sheet.href.includes('tailwind')) {
+                // Mantém apenas estilos essenciais do Tailwind
+                continue;
+              }
+            } catch (e) {
+              // Ignora erros de CORS
+            }
+          }
         }
       });
 
       // Verifica se o canvas foi gerado corretamente
-      if (canvas.width === 0 || canvas.height === 0) {
-        throw new Error('Falha na geração da imagem');
+      if (!canvas || canvas.width === 0 || canvas.height === 0) {
+        throw new Error('Canvas vazio - falha na captura');
       }
 
-      // Cria o link de download
-      const link = document.createElement('a');
-      link.download = `relatorio_frequencia_${reportType}_${format(new Date(), 'yyyy-MM-dd_HH-mm-ss')}.png`;
-      link.href = canvas.toDataURL('image/png', 1.0);
-      
-      // Força o download
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+      console.log('Canvas gerado:', canvas.width, 'x', canvas.height);
 
-      toast({
-        title: "Sucesso",
-        description: "Relatório gerado e baixado com sucesso!"
-      });
+      // Converte para blob e cria URL
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.download = `relatorio_frequencia_${reportType}_${format(new Date(), 'yyyy-MM-dd_HH-mm-ss')}.png`;
+          link.href = url;
+          
+          // Força o download
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          
+          // Limpa a URL
+          URL.revokeObjectURL(url);
+
+          toast({
+            title: "Sucesso",
+            description: "Relatório gerado e baixado com sucesso!"
+          });
+        } else {
+          throw new Error('Falha na conversão para blob');
+        }
+      }, 'image/png', 1.0);
+
     } catch (error) {
-      console.error('Erro ao gerar relatório:', error);
+      console.error('Erro detalhado ao gerar relatório:', error);
       toast({
         title: "Erro",
-        description: "Erro ao gerar relatório. Tente novamente.",
+        description: `Erro ao gerar relatório: ${error}`,
         variant: "destructive"
       });
     } finally {
@@ -296,19 +332,22 @@ const VisualReportGenerator = () => {
         <CardHeader className="bg-gray-50 border-b border-gray-200">
           <CardTitle className="text-black">Preview do Relatório</CardTitle>
         </CardHeader>
-        <CardContent className="p-0 flex justify-center">
+        <CardContent className="p-0 flex justify-center bg-gray-100">
           <div 
             ref={reportRef} 
-            data-report-content 
+            data-report-content="true"
             style={{ 
               backgroundColor: '#ffffff',
               color: '#000000',
               width: '800px',
               maxWidth: '800px',
               minWidth: '800px',
-              margin: '0',
+              margin: '20px auto',
               overflow: 'visible',
-              display: 'block'
+              display: 'block',
+              visibility: 'visible',
+              opacity: 1,
+              position: 'relative'
             }}
           >
             <ReportContent
