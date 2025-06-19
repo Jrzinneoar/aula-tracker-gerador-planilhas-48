@@ -80,6 +80,9 @@ const ReportGenerator = () => {
       isWithinInterval(new Date(session.date), dateRange)
     );
 
+    console.log('Debug ReportGenerator - Filtered absences:', filteredAbsences.length);
+    console.log('Debug ReportGenerator - Filtered classes:', filteredClasses.length);
+
     return { filteredAbsences, filteredClasses };
   };
 

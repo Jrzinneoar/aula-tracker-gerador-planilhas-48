@@ -216,32 +216,37 @@ const VisualReportGenerator = () => {
     }
   };
 
-  // Estatísticas calculadas
-  const attendanceRate = filteredClasses.length > 0 ? 
-    ((filteredClasses.reduce((sum: number, cls: any) => sum + (cls.attendance_records?.length || 0), 0) / 
-      (filteredClasses.length * students.length)) * 100) : 0;
+  // Estatísticas calculadas - CORRIGIDO
+  const totalAttendances = filteredClasses.reduce((sum: number, cls: any) => sum + (cls.attendance_records?.length || 0), 0);
+  const totalPossibleAttendances = filteredClasses.length * students.length;
+  const attendanceRate = totalPossibleAttendances > 0 ? ((totalAttendances / totalPossibleAttendances) * 100) : 0;
+
+  console.log('Debug - Total attendances:', totalAttendances);
+  console.log('Debug - Total possible attendances:', totalPossibleAttendances);
+  console.log('Debug - Filtered absences:', filteredAbsences.length);
+  console.log('Debug - Attendance rate:', attendanceRate);
 
   const subjectsWithClasses = [...new Set(filteredClasses.map((cls: any) => cls.subject?.name))].length;
   const averageAbsencesPerStudent = students.length > 0 ? (filteredAbsences.length / students.length) : 0;
   const justifiedAbsences = filteredAbsences.filter((abs: any) => abs.justified).length;
   const unjustifiedAbsences = filteredAbsences.length - justifiedAbsences;
-  const totalAttendances = filteredClasses.reduce((sum: number, cls: any) => sum + (cls.attendance_records?.length || 0), 0);
   const studentsWithPerfectAttendance = students.filter(student => 
     !filteredAbsences.some((abs: any) => abs.student_id === student.id)
   ).length;
 
-  // Estatísticas por matéria
+  // Estatísticas por matéria - CORRIGIDO
   const subjectStats = subjects.map(subject => {
     const subjectClasses = filteredClasses.filter((cls: any) => cls.subject_id === subject.id);
     const subjectAbsences = filteredAbsences.filter((abs: any) => abs.subject_id === subject.id);
     const subjectAttendances = subjectClasses.reduce((sum: number, cls: any) => sum + (cls.attendance_records?.length || 0), 0);
+    const subjectPossibleAttendances = subjectClasses.length * students.length;
     
     return {
       name: subject.name,
       classes: subjectClasses.length,
       absences: subjectAbsences.length,
       attendances: subjectAttendances,
-      attendanceRate: subjectClasses.length > 0 ? ((subjectAttendances / (subjectClasses.length * students.length)) * 100) : 0
+      attendanceRate: subjectPossibleAttendances > 0 ? ((subjectAttendances / subjectPossibleAttendances) * 100) : 0
     };
   }).filter(stat => stat.classes > 0);
 
